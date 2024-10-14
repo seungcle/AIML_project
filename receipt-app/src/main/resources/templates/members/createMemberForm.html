@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<style>
+    .fieldError {
+        border-color: #bd2130;
+    }
+</style>
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"/>
+    <h1>회원가입</h1>
+    <form role="form" action="/members/new" th:object="${memberForm}" method="post">
+        <!-- 이름 -->
+        <div class="form-group">
+            <label th:for="name">이름</label>
+            <input type="text" th:field="*{name}" class="form-control"
+                   placeholder="이름을 입력하세요"
+                   th:class="${#fields.hasErrors('name')}? 'form-control fieldError' : 'form-control'">
+            <p th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Incorrect name</p>
+        </div>
+
+        <!-- 이메일 -->
+        <div class="form-group">
+            <label th:for="email">이메일</label>
+            <input type="email" th:field="*{email}" class="form-control"
+                   placeholder="이메일을 입력하세요"
+                   th:class="${#fields.hasErrors('email')}? 'form-control fieldError' : 'form-control'">
+            <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Incorrect email</p>
+        </div>
+
+        <!-- 비밀번호 -->
+        <div class="form-group">
+            <label th:for="password">비밀번호</label>
+            <input type="password" th:field="*{password}" class="form-control"
+                   placeholder="비밀번호를 입력하세요"
+                   th:class="${#fields.hasErrors('password')}? 'form-control fieldError' : 'form-control'">
+            <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Incorrect password</p>
+        </div>
+
+        <!-- 그룹 선택 -->
+        <div class="form-group">
+            <label th:for="group">그룹</label>
+            <select th:field="*{groupId}" class="form-control">
+                <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}">그룹</option>
+            </select>
+        </div>
+
+        <!-- 제출 버튼 -->
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <br/>
+    <div th:replace="fragments/footer :: footer" />
+</div> <!-- /container -->
+</body>
+</html>
