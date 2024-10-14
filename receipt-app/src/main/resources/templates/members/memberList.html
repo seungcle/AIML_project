@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header" />
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader" />
+
+    <!-- 전체 회원 목록 -->
+    <h4>전체 회원 목록</h4>
+    <div>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>이름</th>
+                <th>이메일</th>
+                <th>비밀번호</th> <!-- 주의: 비밀번호는 실제로 출력하지 않도록 수정할 필요가 있음 -->
+                <th>그룹</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="member : ${members}">
+                <td th:text="${member.id}"></td> <!-- member.id로 수정 -->
+                <td th:text="${member.name}"></td>
+                <td th:text="${member.email}"></td>
+                <td th:text="${member.password}"></td> <!-- 실제 운영에서는 비밀번호를 노출하지 않도록 해야 합니다 -->
+                <td th:text="${member.group != null ? member.group.name : '그룹 없음'}"></td> <!-- 그룹 이름 출력 -->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 그룹 1에 속한 회원 목록 -->
+    <h4>그룹 1에 속한 회원 목록</h4>
+    <div>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>이름</th>
+                <th>이메일</th>
+                <th>비밀번호</th> <!-- 주의: 비밀번호는 실제로 출력하지 않도록 수정할 필요가 있음 -->
+                <th>그룹</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="member : ${membersGroup}">
+                <td th:text="${member.id}"></td> <!-- member.id로 수정 -->
+                <td th:text="${member.name}"></td>
+                <td th:text="${member.email}"></td>
+                <td th:text="${member.password}"></td> <!-- 실제 운영에서는 비밀번호를 노출하지 않도록 해야 합니다 -->
+                <td th:text="${member.group?.name}"></td> <!-- 그룹 이름 출력 -->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:replace="fragments/footer :: footer" />
+</div> <!-- /container -->
+</body>
+</html>

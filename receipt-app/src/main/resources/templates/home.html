@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/header :: header">
+    <title>Hello</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<div class="container">
+    <div th:replace="fragments/bodyHeader :: bodyHeader"></div>
+    <div class="jumbotron">
+        <h1>receipt</h1>
+        <p class="lead">회원 기능</p>
+
+        <div class="row">
+            <div class="col">
+                <button class="btn btn-lg btn-dark"
+                        type="button" th:onclick="|location.href='@{/members/add}'|">
+                    회원 가입
+                </button>
+            </div>
+            <div class="col">
+                <button class="btn btn-lg btn-dark"
+                        th:onclick="|location.href='@{/login}'|" type="button">
+                    로그인
+                </button>
+            </div>
+        </div>
+
+        <p class="lead">영수증 등록 기능</p>
+        <p>
+            <a class="btn btn-lg btn-dark" th:href="@{/items/new}">영수증 등록</a>
+            <a class="btn btn-lg btn-dark" th:href="@{/items}">영수증 목록</a>
+        </p>
+        <p class="lead">비어있음</p>
+        <p>
+            <a class="btn btn-lg btn-info" th:href="@{/order}">비어있음</a>
+            <a class="btn btn-lg btn-info" th:href="@{/orders}">비어있음</a>
+        </p>
+    </div>
+    <div th:replace="fragments/footer :: footer"></div>
+</div> <!-- /container -->
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인</title>
+    <link th:href="@{/css/bootstrap.min.css}" href="../css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            max-width: 560px;
+        }
+        .field-error {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="py-5 text-center">
+        <h2>로그인</h2>
+    </div>
+
+    <!-- 로그인 실패 시 오류 메시지 표시 -->
+    <div th:if="${param.error}">
+        <p class="field-error">아이디 또는 비밀번호가 맞지 않습니다.</p>
+    </div>
+
+    <!-- 로그인 폼 -->
+    <form th:action="@{/login}" method="post">
+        <div>
+            <label for="email">이메일</label>
+            <input type="text" id="email" name="email" class="form-control" required> <!-- username으로 변경 -->
+        </div>
+
+        <div>
+            <label for="password">비밀번호</label>
+            <input type="password" id="password" name="password" class="form-control" required> <!-- name="password" 설정 -->
+        </div>
+
+        <hr class="my-4">
+
+        <button type="submit" class="btn btn-primary w-100">로그인</button>
+    </form>
+</div>
+</body>
+</html>
