@@ -33,11 +33,16 @@ dependencies {
 	implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'mysql:mysql-connector-java:8.0.32'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5:3.0.4.RELEASE'
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'javax.xml.bind:jaxb-api:2.3.1' // JDK 11 이상에서 사용할 수 있는 JAXB API
+	implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1' // JAXB 런타임
 }
 
 tasks.named('test') {

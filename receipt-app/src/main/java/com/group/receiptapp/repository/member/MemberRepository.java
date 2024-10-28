@@ -1,5 +1,6 @@
 package com.group.receiptapp.repository.member;
 
+import com.group.receiptapp.domain.group.Group;
 import com.group.receiptapp.domain.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -16,4 +17,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 그룹에 속한 회원들을 조회하는 메서드
     List<Member> findByGroupId(Long groupId);
+
+    List<Member> findByGroup(Group group);
 }
