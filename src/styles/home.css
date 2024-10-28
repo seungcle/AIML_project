@@ -1,0 +1,113 @@
+/* Typography and Color Scheme */
+body {
+  font-family: 'Roboto', sans-serif;
+  color: #333;
+  background-color: #f7f9fc;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+.home-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.home-title {
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: #005bb5;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.home-description {
+  font-size: 1.2rem;
+  color: #555;
+  line-height: 1.8;
+  max-width: 800px;
+  margin: 0 auto 50px;
+  text-align: center;
+}
+
+/* Button Styling with Hover and Ripple Effects */
+.custom-button {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  color: #fff;
+  background: linear-gradient(90deg, #0073e6, #005bb5);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.custom-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: opacity 0.5s, transform 0.5s;
+  opacity: 0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.1);
+}
+
+.custom-button:hover::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.custom-button:hover {
+  background: linear-gradient(90deg, #005bb5, #003f7d);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Section Styling with Hover Animation and Shadow */
+.home-section {
+  padding: 30px;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 40px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.home-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Animation for Section Content Appearance */
+.home-section-content {
+  opacity: 0;
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Footer Styling */
+.footer {
+  padding: 20px;
+  background-color: #333;
+  color: #f7f9fc;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+

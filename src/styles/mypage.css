@@ -1,0 +1,31 @@
+.mypage-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.receipts-section, .affiliation-section, .team-expenses-section {
+    margin-bottom: 40px;
+}
+
+.receipts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.receipt-item {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.receipt-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.receipt-info p {
+    margin: 5px 0;
+}
