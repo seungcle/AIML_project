@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = false)
 @RequiredArgsConstructor
 public class MemberService {
 
@@ -24,12 +24,12 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
 
     /* 회원가입 */
-    public Long join(Member member) {
+    @Transactional
+    public Member join(Member member) {
         validateDuplicateEmail(member);  // 중복 이메일 검사
         String encodedPassword = passwordEncoder.encode(member.getPassword());  // 비밀번호 암호화
         member.setPassword(encodedPassword);  // 암호화된 비밀번호 설정
-        memberRepository.save(member);
-        return member.getId();
+        return memberRepository.save(member);  // 회원 저장 후 Member 객체 반환
     }
 
     // 이메일 중복 검사

@@ -17,6 +17,8 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
   messages:
     basename: messages
+  jwt:
+    secret-key: aimlproject
 
 logging:
   level:
@@ -44,6 +46,8 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
   messages:
     basename: messages
+  jwt:
+    secret-key: aimlproject
 
 logging:
   level:

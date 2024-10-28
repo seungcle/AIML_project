@@ -40,12 +40,13 @@ class MemberServiceTest {
         member.setGroup(group);
 
         //When
-        Long saveId = memberService.join(member);
+        Member savedMember = memberService.join(member);
+        Long saveId = savedMember.getId();
 
         //Then
-        Member savedMember = memberRepository.findById(saveId).orElse(null);
-        assertNotNull(savedMember);
-        assertEquals(member.getName(), savedMember.getName());
+        Member foundMember = memberRepository.findById(saveId).orElse(null);
+        assertNotNull(foundMember);
+        assertEquals(member.getName(), foundMember.getName());
     }
     @Test
     public void 중복_회원_예외() throws Exception {

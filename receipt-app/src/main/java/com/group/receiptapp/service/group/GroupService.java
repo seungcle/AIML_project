@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional(readOnly = false)
 @RequiredArgsConstructor
 
 public class GroupService {
@@ -42,8 +42,10 @@ public class GroupService {
 
     // 그룹별 회원 조회 메서드
     public List<Member> findMembersByGroup(Long groupId) {
-        return memberRepository.findByGroupId(groupId);
+        Group group = findOne(groupId); // 그룹 조회
+        return memberRepository.findByGroup(group); // 그룹 ID 대신 Group 객체로 조회
     }
+
 
     public Optional<Group> findByName(String name) {
         return groupRepository.findByName(name);
