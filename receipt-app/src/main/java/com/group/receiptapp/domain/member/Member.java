@@ -5,12 +5,9 @@ import com.group.receiptapp.domain.receipt.Receipt;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,10 +43,9 @@ public class Member {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    @NotNull(message = "그룹을 선택해 주세요.")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", nullable = false)
-    private Group group;
+    @JoinColumn(name = "group_id")
+    private Group group; // 그룹을 필수가 아닌 선택 항목으로 수정
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Receipt> receipt = new ArrayList<>();

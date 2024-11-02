@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "member_group")
@@ -27,6 +25,10 @@ public class Group {
     private List<Member> members = new ArrayList<>(); // 그룹에 속한 사용자들
 
     public Group() {}
+
+    public Group(Long id) {
+        this.id = id;
+    }
 
     public Group(String name) {
         this.name = name;

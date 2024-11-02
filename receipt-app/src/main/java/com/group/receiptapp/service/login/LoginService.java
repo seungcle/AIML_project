@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -30,19 +31,22 @@ public class LoginService {
 
     // 리프레시 토큰 발급
     public String generateRefreshToken(Member member) {
-        String refreshToken = jwtUtil.generateRefreshToken(member.getEmail()); // JWT 유틸 클래스를 통해 리프레시 토큰 생성
+        // 기존 리프레시 토큰이 존재하면 삭제
+        refreshTokenRepository.findByMemberId(member.getId()).ifPresent(existingToken ->
+                refreshTokenRepository.delete(existingToken)
+        );
+
+        // 새 리프레시 토큰 생성 및 저장
+        String refreshToken = jwtUtil.generateRefreshToken(member.getEmail());
         RefreshToken tokenEntity = new RefreshToken(member.getId(), refreshToken);
-        refreshTokenRepository.save(tokenEntity); // DB에 저장
+        refreshTokenRepository.save(tokenEntity);
         return refreshToken;
     }
 
     public void invalidateRefreshToken(String refreshToken) {
-        Optional<RefreshToken> token = refreshTokenRepository.findByToken(refreshToken); // 토큰 검색
-        if (token.isPresent()) {
-            refreshTokenRepository.delete(token.get()); // 해당 토큰 삭제
-        } else {
-            // 로그 추가 또는 예외 처리
-            System.out.println("토큰이 존재하지 않습니다: " + refreshToken);
-        }
+        RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new NoSuchElementException("해당 토큰이 존재하지 않습니다: " + refreshToken));
+
+        refreshTokenRepository.delete(token); // 해당 토큰 삭제
     }
 }

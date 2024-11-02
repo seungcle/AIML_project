@@ -11,5 +11,12 @@ public class GroupResponse {
         this.name = group.getName();
     }
 
-    // Getters and setters if needed
+    // Getter 메서드 추가
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
 }
