@@ -32,9 +32,9 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: "jdbc:mysql://localhost/receipt"
+    url: "jdbc:mysql://43.200.6.203/receipt"
     username: "root"
-    password: "0522"  # 실제 MySQL 비밀번호 입력
+    password: "102604jh#*"  # 실제 MySQL 비밀번호 입력
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
