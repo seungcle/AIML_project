@@ -27,13 +27,8 @@ public class LoginController {
         this.jwtUtil = jwtUtil; // JwtUtil 주입
     }
 
-    @GetMapping
-    public String loginForm(@ModelAttribute("loginForm") LoginForm form) {
-        return "login/loginForm"; // HTML 폼 렌더링
-    }
-
-    @PostMapping("/api") // API 엔드포인트
-    public ResponseEntity<Map<String, Object>> loginApi(@Valid @RequestBody LoginForm form, BindingResult result) {
+    @PostMapping // API 엔드포인트
+    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginForm form, BindingResult result) {
         log.debug("Login attempt with email: {}", form.getEmail()); // 로그인을 시도한 이메일 로그 출력
 
         // 로그인 서비스 호출하여 사용자 인증
@@ -60,28 +55,5 @@ public class LoginController {
         response.put("access_token", accessToken);
 
         return ResponseEntity.ok(response); // JSON 응답 반환
-    }
-
-    @PostMapping // HTML 폼 제출 처리
-    public String login(@Valid @ModelAttribute("loginForm") LoginForm form, BindingResult result) {
-        log.debug("Login attempt with email: {}", form.getEmail());
-
-        if (result.hasErrors()) {
-            return "login/loginForm"; // 입력 오류가 있으면 로그인 폼으로 돌아감
-        }
-
-        Member loginMember = loginService.login(form.getEmail(), form.getPassword());
-        log.info("Login attempt for email: {}", form.getEmail());
-
-        if (loginMember == null) {
-            // 로그인 실패 시 처리
-            log.warn("Login failed for email: {}", form.getEmail()); // 경고 로그
-            result.reject("loginFail", "아이디 또는 비밀번호가 맞지 않습니다.");
-            return "login/loginForm"; // 로그인 실패 시 다시 폼으로
-        }
-
-        // 로그인 성공 처리
-        log.info("Login successful for user: {}", loginMember.getEmail());
-        return "redirect:/home";  // 로그인 성공 후 홈으로 이동
     }
 }
