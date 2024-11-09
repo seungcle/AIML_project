@@ -8,6 +8,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "js-cookie": "^3.0.5",
     "react": "^18.3.1",
     "react-cookies": "^0.1.1",
     "react-dom": "^18.3.1",
@@ -40,5 +41,5 @@
     ]
   },
   "proxy": "http://192.168.0.100:8080",
-  "note": "서버 주소,포트번호에 맞게 변경"  
+  "note": "서버 주소,포트번호에 맞게 변경"
 }

@@ -2,25 +2,23 @@ import React, { useState } from 'react';
 import '../styles/signUp.css';  // CSS 파일 가져오기
 
 function SignUp() {
-  const [id, setId] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [dob, setDob] = useState('');
   const [message, setMessage] = useState('');
 
   const handleSignup = async () => {
-    if (id && password && name && dob) {
+    if (email && password && name) {
       try {
-        const response = await fetch('/api/signup', {  
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/member/signup`, {  
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            id: id,
+            email: email,
             password: password,
             name: name,
-            dob: dob,
           }),
         });
 
@@ -43,13 +41,13 @@ function SignUp() {
       <h2 className="signup-title">회원가입</h2>
       <form className="signup-form">
         <div className="form-group">
-          <label htmlFor="id">아이디</label>
+          <label htmlFor="email">이메일</label>
           <input
-            type="text"
-            id="id"
-            placeholder="아이디"
-            value={id}
-            onChange={(e) => setId(e.target.value)}
+            type="email"
+            id="email"
+            placeholder="이메일"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="form-group">
@@ -72,15 +70,6 @@ function SignUp() {
             onChange={(e) => setName(e.target.value)}
           />
         </div>
-        <div className="form-group">
-          <label htmlFor="dob">생년월일</label>
-          <input
-            type="date"
-            id="dob"
-            value={dob}
-            onChange={(e) => setDob(e.target.value)}
-          />
-        </div>
         <button className="custom-button" type="button" onClick={handleSignup}>회원가입</button>
       </form>
       <p>{message}</p>
@@ -89,5 +78,3 @@ function SignUp() {
 }
 
 export default SignUp;
-
-
