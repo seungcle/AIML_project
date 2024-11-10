@@ -32,14 +32,14 @@ spring:
     activate:
       on-profile: dev
   datasource:
-#    url: "jdbc:mysql://3.36.81.80:3306/receipt"
-#    username: "root"
-#    password: "102604jh#*"  # 실제 MySQL 비밀번호 입력
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: "jdbc:mysql://localhost/receipt"
+    url: "jdbc:mysql://3.36.81.80:3306/receipt"
     username: "root"
-    password: "0522"  # 실제MySQL 비밀번호 입력
+    password: "102604jh#*"  # 실제 MySQL 비밀번호 입력
     driver-class-name: com.mysql.cj.jdbc.Driver
+#   url: "jdbc:mysql://localhost/receipt"
+#   username: "root"
+#   password: "0522"  # 실제MySQL 비밀번호 입력
+#   driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: none #   create-drop none
