@@ -1,4 +1,4 @@
-package com.group.receiptapp.web.member;
+package com.group.receiptapp.controller.member;
 
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.dto.MemberResponse;

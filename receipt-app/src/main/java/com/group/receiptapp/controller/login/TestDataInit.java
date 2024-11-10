@@ -1,4 +1,4 @@
-package com.group.receiptapp.web.login;
+package com.group.receiptapp.controller.login;
 
 import com.group.receiptapp.domain.group.Group;
 import com.group.receiptapp.domain.member.Member;
@@ -26,9 +26,9 @@ public class TestDataInit {
                 .orElseThrow(() -> new IllegalStateException("기본 그룹이 없습니다."));
 
         Member member = new Member();
-        member.setEmail("test@test.com");
+        member.setEmail("test123@test.com");
         member.setPassword(passwordEncoder.encode("test123!"));  // 비밀번호 암호화
-        member.setName("테스터");
+        member.setName("테스터123");
         member.setGroup(defaultGroup);
         memberRepository.save(member);
     }
