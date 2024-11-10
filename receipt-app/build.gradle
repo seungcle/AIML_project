@@ -41,6 +41,8 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'javax.xml.bind:jaxb-api:2.3.1' // JDK 11 이상에서 사용할 수 있는 JAXB API
 	implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1' // JAXB 런타임
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'javax.mail:javax.mail-api:1.6.2'
 }
 
 tasks.named('test') {

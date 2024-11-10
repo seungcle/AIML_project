@@ -36,9 +36,13 @@ spring:
     username: "root"
     password: "102604jh#*"  # 실제 MySQL 비밀번호 입력
     driver-class-name: com.mysql.cj.jdbc.Driver
+#   url: "jdbc:mysql://localhost/receipt"
+#   username: "root"
+#   password: "0522"  # 실제MySQL 비밀번호 입력
+#   driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: none #   create-drop none
     properties:
       hibernate:
         show_sql: true

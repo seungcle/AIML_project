@@ -1,4 +1,4 @@
-package com.group.receiptapp.web.login;
+package com.group.receiptapp.controller.login;
 
 import com.group.receiptapp.service.login.LoginService;
 import org.springframework.http.HttpStatus;

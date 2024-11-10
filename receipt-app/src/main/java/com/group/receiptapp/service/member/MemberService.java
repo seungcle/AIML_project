@@ -53,6 +53,11 @@ public class MemberService {
         return group.getMembers(); // 그룹에 속한 회원들을 반환
     }
 
+    public Member getMemberByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("이메일에 해당하는 회원이 존재하지 않습니다: " + email));
+    }
+
     // 이메일로 회원 조회 (로그인 시 사용)
     public Optional<Member> findByEmail(String email) {
         return memberRepository.findByEmail(email);

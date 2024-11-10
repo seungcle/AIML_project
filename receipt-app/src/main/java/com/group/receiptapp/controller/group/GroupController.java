@@ -1,0 +1,103 @@
+package com.group.receiptapp.controller.group;
+
+import com.group.receiptapp.domain.group.Group;
+import com.group.receiptapp.domain.join.JoinRequest;
+import com.group.receiptapp.domain.member.Member;
+import com.group.receiptapp.dto.GroupResponse;
+import com.group.receiptapp.dto.join.JoinRequestResponse;
+import com.group.receiptapp.security.JwtUtil;
+import com.group.receiptapp.service.EmailService;
+import com.group.receiptapp.service.group.GroupService;
+import com.group.receiptapp.service.login.LoginService;
+import com.group.receiptapp.service.member.MemberService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.group.receiptapp.dto.group.CreateGroupRequest;
+
+@RestController
+@RequestMapping("/group")
+public class GroupController {
+
+    private final MemberService memberService;
+    private final GroupService groupService;
+    private final EmailService emailService;
+
+    public GroupController(MemberService memberService, GroupService groupService, EmailService emailService) {
+        this.memberService = memberService; // memberService 주입
+        this.groupService = groupService; // groupService 주입
+        this.emailService = emailService;
+    }
+
+    @PostMapping(value = "/create", produces = "application/json")
+    public ResponseEntity<GroupResponse> createGroup(@RequestBody CreateGroupRequest request, Principal principal) {
+        String email = principal.getName();  // 인증된 사용자의 이메일을 가져옴
+        Member admin = memberService.getMemberByEmail(email);
+
+        admin.setAdmin(true);
+        Group group = groupService.createGroup(request, admin);
+        return ResponseEntity.ok(new GroupResponse(group));
+    }
+
+    @PostMapping("/join/{groupId}")
+    public ResponseEntity<JoinRequestResponse> requestToJoinGroup(@PathVariable Long groupId, Principal principal) {
+        String email = principal.getName();
+        Member member = memberService.getMemberByEmail(email);
+
+        JoinRequest joinRequest = groupService.requestToJoinGroup(groupId, member);
+        JoinRequestResponse response = JoinRequestResponse.fromEntity(joinRequest);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/requests/approve/{joinRequestId}")
+    public ResponseEntity<Map<String, String>> approveJoinRequest(@PathVariable Long joinRequestId) {
+        groupService.updateJoinRequestStatus(joinRequestId, JoinRequest.Status.APPROVED);
+
+        // 이메일 알림 전송
+//        String toEmail = groupService.getMemberEmailByJoinRequestId(joinRequestId); // 가입 요청 ID로 이메일 가져오기 메서드
+//        emailService.sendApprovalEmail(toEmail, "가입 승인 안내", "축하합니다! 그룹 가입이 승인되었습니다.");
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "가입 요청이 승인되었습니다.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/requests/reject/{joinRequestId}")
+    public ResponseEntity<Map<String, String>> rejectJoinRequest(@PathVariable Long joinRequestId) {
+        groupService.updateJoinRequestStatus(joinRequestId, JoinRequest.Status.REJECTED);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "가입 요청이 거절되었습니다.");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<GroupResponse>> getAllGroups() {
+        List<GroupResponse> groups = groupService.findAllGroups().stream()
+                .map(GroupResponse::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(groups);
+    }
+
+    @GetMapping("/requests/{groupId}")
+    public ResponseEntity<List<JoinRequestResponse>> getJoinRequests(@PathVariable Long groupId) {
+        List<JoinRequest> joinRequests = groupService.findJoinRequestsByGroup(groupId);
+
+        List<JoinRequestResponse> responses = joinRequests.stream()
+                .map(JoinRequestResponse::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(responses);
+    }
+}
