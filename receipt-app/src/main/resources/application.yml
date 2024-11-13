@@ -60,8 +60,8 @@ spring:
       on-profile: dev
   datasource:
     url: "jdbc:mysql://3.36.81.80:3306/receipt"
-    username: ${DB_USERNAME_DEV}
-    password: ${DB_PASSWORD_DEV}  # 실제 MySQL 비밀번호 입력
+    username: "root"
+    password: "102604jh#*" # 실제 MySQL 비밀번호 입력
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
