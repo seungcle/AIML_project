@@ -1,45 +1,68 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+          ssl.enable: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
   config:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:h2:tcp://localhost/~/receipt
-    username: "sa"
-    password: ""
-    driver-class-name: org.h2.Driver
+    url: "jdbc:mysql://localhost/receipt"
+    username: ${DB_USERNAME_LOCAL}
+    password: ${DB_PASSWORD_LOCAL}  # 실제MySQL 비밀번호 입력
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop #   create-drop none
     properties:
       hibernate:
         show_sql: true
         format_sql: true
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.MySQL8Dialect
   messages:
     basename: messages
   jwt:
-    secret-key: aimlproject
+    secret-key: ${JWT_SECRET_KEY}
 
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
     org.springframework.security: DEBUG  # Spring Security 로그를 DEBUG 수준으로 설정
-
 ---
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+          ssl.enable: false
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
   config:
     activate:
       on-profile: dev
   datasource:
     url: "jdbc:mysql://3.36.81.80:3306/receipt"
-    username: "root"
-    password: "102604jh#*"  # 실제 MySQL 비밀번호 입력
+    username: ${DB_USERNAME_DEV}
+    password: ${DB_PASSWORD_DEV}  # 실제 MySQL 비밀번호 입력
     driver-class-name: com.mysql.cj.jdbc.Driver
-#   url: "jdbc:mysql://localhost/receipt"
-#   username: "root"
-#   password: "0522"  # 실제MySQL 비밀번호 입력
-#   driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: none #   create-drop none
@@ -51,7 +74,7 @@ spring:
   messages:
     basename: messages
   jwt:
-    secret-key: aimlproject
+    secret-key: ${JWT_SECRET_KEY}
 
 logging:
   level:

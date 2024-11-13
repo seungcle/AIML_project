@@ -1,17 +1,14 @@
 package com.group.receiptapp.controller.group;
 
+import com.group.receiptapp.domain.email.EmailMessage;
 import com.group.receiptapp.domain.group.Group;
 import com.group.receiptapp.domain.join.JoinRequest;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.dto.GroupResponse;
 import com.group.receiptapp.dto.join.JoinRequestResponse;
-import com.group.receiptapp.security.JwtUtil;
-import com.group.receiptapp.service.EmailService;
+import com.group.receiptapp.service.email.EmailService;
 import com.group.receiptapp.service.group.GroupService;
-import com.group.receiptapp.service.login.LoginService;
 import com.group.receiptapp.service.member.MemberService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,8 +60,13 @@ public class GroupController {
         groupService.updateJoinRequestStatus(joinRequestId, JoinRequest.Status.APPROVED);
 
         // 이메일 알림 전송
-//        String toEmail = groupService.getMemberEmailByJoinRequestId(joinRequestId); // 가입 요청 ID로 이메일 가져오기 메서드
-//        emailService.sendApprovalEmail(toEmail, "가입 승인 안내", "축하합니다! 그룹 가입이 승인되었습니다.");
+        String toEmail = groupService.getMemberEmailByJoinRequestId(joinRequestId);
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(toEmail)
+                .subject("가입 승인 안내")
+                .message("그룹 가입이 승인되었습니다.")
+                .build();
+        emailService.sendApprovalEmail(emailMessage);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "가입 요청이 승인되었습니다.");

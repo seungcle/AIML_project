@@ -17,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -24,13 +25,15 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtil jwtUtil;
+    private final CorsConfig corsConfig;
 
     @Autowired
     private ObjectMapper objectMapper; // ObjectMapper 주입
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtUtil jwtUtil) {
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtUtil jwtUtil, CorsConfig corsConfig) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtUtil = jwtUtil;
+        this.corsConfig = corsConfig;
     }
 
     @Bean
@@ -42,12 +45,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
+                .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource())) // CORS 설정 추가
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/add", "/login", "/member/signup", "/css/**", "/js/**", "/logo192.png", "/error").permitAll()
                         .requestMatchers("/logout").authenticated() // 로그아웃 엔드포인트에 대해 인증 요구
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증을 요구
                 )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션을 사용하지 않고 토큰만 사용
                 )
