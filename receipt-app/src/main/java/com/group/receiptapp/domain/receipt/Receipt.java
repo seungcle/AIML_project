@@ -8,16 +8,24 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name= "receipt")
-@Getter @Setter
+@Table(name = "receipt")
+@Getter
+@Setter
 public class Receipt {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="receipt_id")
+    @Column(name = "receipt_id")
     private Long id;
+
+    @Column(name = "store_name", length = 255)
+    private String storeName; // 점포 이름 (OCR 추출 데이터)
+
+    @Column(name = "store_address", columnDefinition = "TEXT")
+    private String storeAddress; // 점포 주소 (OCR 추출 데이터)
 
     @Column(name = "memo", columnDefinition = "TEXT")
     private String memo; // 영수증 메모
@@ -31,6 +39,9 @@ public class Receipt {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false; // 영수증 삭제 여부
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt; // 삭제 시각 (선택 사항)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Member member; // 영수증을 소유한 유저 (외래 키)
@@ -38,4 +49,12 @@ public class Receipt {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category; // 영수증의 카테고리 (외래 키)
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "image_id")
+    private ReceiptImage receiptImage; // 영수증 이미지와의 관계
+
+    public Long getImageId() {
+        return receiptImage != null ? receiptImage.getId() : null; // receiptImage가 null이 아니면 그 id를 반환, null이면 null 반환
+    }
 }

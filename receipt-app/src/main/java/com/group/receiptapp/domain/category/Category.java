@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name= "category")
@@ -22,7 +23,7 @@ public class Category {
     private String name; // 카테고리 이름
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ArrayList<Receipt> receipts = new ArrayList<>(); // 이 카테고리에 속한 영수증들
+    private List<Receipt> receipts; // 이 카테고리에 속한 영수증들
 
     public Category() {}
 

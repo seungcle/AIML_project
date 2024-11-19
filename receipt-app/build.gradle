@@ -43,6 +43,11 @@ dependencies {
 	implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1' // JAXB 런타임
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'javax.mail:javax.mail-api:1.6.2'
+	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
+	implementation 'org.springframework.boot:spring-boot-starter-json'
+
+
+
 }
 
 tasks.named('test') {
