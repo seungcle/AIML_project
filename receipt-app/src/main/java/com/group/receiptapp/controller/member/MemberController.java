@@ -1,13 +1,15 @@
 package com.group.receiptapp.controller.member;
 
 import com.group.receiptapp.domain.member.Member;
-import com.group.receiptapp.dto.MemberResponse;
+import com.group.receiptapp.dto.member.MemberResponse;
+import com.group.receiptapp.security.CustomUserDetails;
 import com.group.receiptapp.service.group.GroupService;
 import com.group.receiptapp.service.member.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,6 +36,14 @@ public class MemberController {
             MemberResponse errorResponse = new MemberResponse("이미 존재하는 이메일입니다.");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity<MemberResponse> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getMember() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(new MemberResponse(userDetails.getMember()));
     }
 
     @GetMapping

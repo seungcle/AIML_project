@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   mail:
     host: smtp.gmail.com
     port: 587
@@ -23,7 +27,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop #   create-drop none
+      ddl-auto: update #   create-drop none
     properties:
       hibernate:
         show_sql: true
@@ -39,6 +43,12 @@ logging:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
     org.springframework.security: DEBUG  # Spring Security 로그를 DEBUG 수준으로 설정
+
+clova:
+  ocr:
+    client-id: "sm6pcc5t4e" # 발급받은 Client ID
+    client-secret: "SHZ5cmNhZ2lnTlhPWEZ4WmdpdkJ4SVFIa0JvekRxemY=" # 발급받은 Client Secret
+    url: "https://djyhuy4mnd.apigw.ntruss.com/custom/v1/35910/c9c51c7e47ecae4852bf3de8a921c33abd6369260f7538fd01fe2f4cd5f90676/document/receipt" # Clova OCR API URL
 ---
 spring:
   mail:
@@ -81,3 +91,9 @@ logging:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
     org.springframework.security: DEBUG  # Spring Security 로그를 DEBUG 수준으로 설정
+
+clova:
+  ocr:
+    client-id: "sm6pcc5t4e" # 발급받은 Client ID
+    client-secret: "SHZ5cmNhZ2lnTlhPWEZ4WmdpdkJ4SVFIa0JvekRxemY=" # 발급받은 Client Secret
+    url: "https://djyhuy4mnd.apigw.ntruss.com/custom/v1/35910/c9c51c7e47ecae4852bf3de8a921c33abd6369260f7538fd01fe2f4cd5f90676/document/receipt" # Clova OCR API URL
