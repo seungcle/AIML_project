@@ -57,4 +57,8 @@ public class Receipt {
     public Long getImageId() {
         return receiptImage != null ? receiptImage.getId() : null; // receiptImage가 null이 아니면 그 id를 반환, null이면 null 반환
     }
+
+    public Long getCategoryId() {
+        return category != null ? category.getId() : null; // category가 null이 아니면 그 id를 반환, null이면 null 반환
+    }
 }

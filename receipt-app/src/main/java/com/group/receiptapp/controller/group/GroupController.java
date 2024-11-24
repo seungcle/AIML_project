@@ -59,6 +59,15 @@ public class GroupController {
     public ResponseEntity<Map<String, String>> approveJoinRequest(@PathVariable Long joinRequestId) {
         groupService.updateJoinRequestStatus(joinRequestId, JoinRequest.Status.APPROVED);
 
+        // 2. JoinRequest에서 Member와 Group 가져오기
+        JoinRequest joinRequest = groupService.getJoinRequestById(joinRequestId);
+        Member member = joinRequest.getMember();
+        Group group = joinRequest.getGroup();
+
+        // 3. Member의 group 필드 업데이트
+        member.setGroup(group);
+        memberService.updateMember(member); // 데이터베이스에 저장
+
         // 이메일 알림 전송
         String toEmail = groupService.getMemberEmailByJoinRequestId(joinRequestId);
         EmailMessage emailMessage = EmailMessage.builder()

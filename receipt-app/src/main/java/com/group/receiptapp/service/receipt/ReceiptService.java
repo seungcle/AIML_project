@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class ReceiptService {
@@ -86,5 +88,25 @@ public class ReceiptService {
             log.error("Error saving receipt: {}", e.getMessage(), e);
             throw e; // 예외를 던져서 트랜잭션 롤백을 유도
         }
+    }
+
+    public List<ReceiptResponse> getReceiptsByMemberId(Long memberId) {
+        // Repository에서 해당 유저의 영수증 조회
+        List<Receipt> receipts = receiptRepository.findByMemberId(memberId);
+
+        // Receipt 엔티티를 ReceiptResponse로 변환
+        return receipts.stream()
+                .map(receipt -> new ReceiptResponse(
+                        receipt.getAmount(),
+                        receipt.getCategoryId(),          // getCategoryId()를 호출하여 카테고리 ID 추출
+                        receipt.getDate(),
+                        receipt.getDeletedAt(),
+                        receipt.getIsDeleted(),
+                        receipt.getMember().getId(),      // Member ID 추출
+                        receipt.getMemo(),
+                        receipt.getImageId(),             // getImageId()를 호출하여 이미지 ID 추출
+                        receipt.getStoreAddress(),
+                        receipt.getStoreName()))
+                .toList();
     }
 }

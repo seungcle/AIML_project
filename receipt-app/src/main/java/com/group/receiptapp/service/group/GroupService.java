@@ -88,7 +88,7 @@ public class GroupService {
         joinRequestRepository.save(joinRequest);
     }
 
-    // 가입요청 조회하고 존재하면 이메일 리턴
+    // 존재하는 가입 요청인지 조회하고 존재하면 이메일 리턴
     public String getMemberEmailByJoinRequestId(Long joinRequestId) {
         // JoinRequest 존재하지 않으면 예외 처리
         JoinRequest joinRequest = joinRequestRepository.findById(joinRequestId)
@@ -96,6 +96,12 @@ public class GroupService {
 
         // JoinRequest에서 Member 이메일 리턴
         return joinRequest.getMember().getEmail();
+    }
+
+    // 존재하는 가입 요청인지 조회하고 존재하면 가입요청 필드 리턴
+    public JoinRequest getJoinRequestById(Long joinRequestId) {
+        return joinRequestRepository.findById(joinRequestId)
+                .orElseThrow(() -> new IllegalArgumentException("가입 요청을 찾을 수 없습니다."));
     }
 
     // 모든 그룹 조회
