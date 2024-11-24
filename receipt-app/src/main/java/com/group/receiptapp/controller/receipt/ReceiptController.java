@@ -13,6 +13,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.List;
+
 @RestController
 @RequestMapping("/receipts")
 public class ReceiptController {
@@ -47,6 +50,26 @@ public class ReceiptController {
             return ResponseEntity.ok(receiptResponse);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ReceiptResponse("Error saving receipt: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<ReceiptResponse>> getUserReceipts(@RequestHeader("Authorization") String authorization) {
+        try {
+            // JWT 토큰에서 사용자 이름 추출
+            String token = authorization.substring(7); // "Bearer " 제거
+            String username = jwtUtil.extractUsername(token);
+
+            // 사용자 정보를 로드하여 memberId를 가져옴
+            Member member = customUserDetailsService.loadUserByUsernameAsMember(username);
+            Long memberId = member.getId(); // Member 엔티티에서 getId() 호출
+
+            // 로그인한 유저의 모든 영수증 조회
+            List<ReceiptResponse> receipts = receiptService.getReceiptsByMemberId(memberId);
+
+            return ResponseEntity.ok(receipts);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Collections.emptyList());
         }
     }
 
