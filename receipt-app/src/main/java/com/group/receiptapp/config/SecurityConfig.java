@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.group.receiptapp.security.JwtAuthenticationFilter;
 import com.group.receiptapp.security.JwtUtil;
 import com.group.receiptapp.service.login.CustomUserDetailsService;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +15,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,6 +24,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.filter.CorsFilter;
+
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -49,8 +57,8 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/add", "/login", "/member/signup", "/css/**", "/js/**", "/logo192.png", "/error").permitAll()
-                        .requestMatchers("/logout").authenticated() // 로그아웃 엔드포인트에 대해 인증 요구
-                        .requestMatchers("/ocr/process", "/receipts/**", "/images/**").permitAll() // 특정 경로 화이트리스트 설정
+                        .requestMatchers("/logout", "/images/**").authenticated() // 로그아웃 엔드포인트에 대해 인증 요구
+                        .requestMatchers("/ocr/process", "/receipts/**").permitAll() // 특정 경로 화이트리스트 설정
                         .requestMatchers("/member/current").authenticated()
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증을 요구
                 )
