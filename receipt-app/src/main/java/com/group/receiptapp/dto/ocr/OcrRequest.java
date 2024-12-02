@@ -11,6 +11,9 @@ public class OcrRequest {
     private long timestamp; // 요청 시각
     private List<Image> images; // 이미지 데이터 리스트
 
+    public void setSubmittedBy(String username) {
+    }
+
     @Data
     public static class Image {
         private String format; // 이미지 형식 (jpg, jpeg, png 등)
