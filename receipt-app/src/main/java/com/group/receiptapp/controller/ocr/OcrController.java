@@ -22,6 +22,7 @@ public class OcrController {
         this.customUserDetailsService = customUserDetailsService;
     }
 
+    /*
     @PostMapping("/process")
     public ResponseEntity<String> processOcr(@RequestBody OcrResponse ocrResponse,
                                              @RequestHeader("Authorization") String authorization) {
@@ -43,4 +44,5 @@ public class OcrController {
             return ResponseEntity.status(500).body("Error processing the OCR request");
         }
     }
+     */
 }

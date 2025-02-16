@@ -1,4 +1,5 @@
 package com.group.receiptapp.service.ocr;
+import com.group.receiptapp.dto.receipt.ReceiptItemRequest;
 import com.group.receiptapp.dto.receipt.ReceiptSaveRequest;
 import com.group.receiptapp.dto.ocr.OcrResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -39,19 +42,14 @@ public class OcrResultParser {
                 if (receipt.getResult().getPaymentInfo() != null && receipt.getResult().getPaymentInfo().getDate() != null) {
                     var dateFormatted = receipt.getResult().getPaymentInfo().getDate().getFormatted();
                     if (dateFormatted != null) {
-                        // formatted 객체에서 year, month, day 직접 접근
                         String year = dateFormatted.getYear();
                         String month = dateFormatted.getMonth();
                         String day = dateFormatted.getDay();
-
-                        // 날짜를 문자열로 결합하여 LocalDate 생성
                         String dateString = year + "-" + month + "-" + day; // "yyyy-MM-dd" 형식
                         try {
-                            // 날짜 파싱 시 예외 처리
                             LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                             request.setDate(date);  // 날짜 설정
                         } catch (DateTimeParseException e) {
-                            // 날짜 파싱 예외 처리
                             log.error("Date parsing failed for date string: {}", dateString, e);
                         }
                     }
@@ -63,14 +61,38 @@ public class OcrResultParser {
                         .map(price -> price.getFormatted().getValue())
                         .ifPresent(totalAmountText -> {
                             try {
-                                // 금액 파싱 시 예외 처리
                                 BigDecimal totalAmount = new BigDecimal(totalAmountText);
                                 request.setTotalAmount(totalAmount);
                             } catch (NumberFormatException e) {
-                                // 금액 파싱 예외 처리
                                 log.error("Total amount parsing failed: {}", totalAmountText, e);
                             }
                         });
+
+                // **품목 리스트 파싱**
+                List<ReceiptItemRequest> items = new ArrayList<>();
+                Optional.ofNullable(receipt.getResult().getSubResults())
+                        .ifPresent(subResults -> subResults.forEach(subResult -> {
+                            Optional.ofNullable(subResult.getItems())
+                                    .ifPresent(subItems -> subItems.forEach(item -> {
+                                        String itemName = Optional.ofNullable(item.getName())
+                                                .map(name -> name.getText())
+                                                .orElse("Unknown Item");
+                                        int quantity = Integer.parseInt(Optional.ofNullable(item.getCount())
+                                                .map(count -> count.getFormatted().getValue())
+                                                .orElse("1"));
+                                        BigDecimal unitPrice = new BigDecimal(Optional.ofNullable(item.getPrice().getUnitPrice())
+                                                .map(price -> price.getFormatted().getValue())
+                                                .orElse("0"));
+                                        BigDecimal totalPrice = new BigDecimal(Optional.ofNullable(item.getPrice().getPrice())
+                                                .map(price -> price.getFormatted().getValue())
+                                                .orElse("0"));
+
+                                        ReceiptItemRequest itemRequest = new ReceiptItemRequest(itemName, quantity, unitPrice, totalPrice);
+                                        items.add(itemRequest);
+                                    }));
+                        }));
+
+                request.setItems(items);  // 품목 리스트 추가
             }
         }
 

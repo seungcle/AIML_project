@@ -3,9 +3,12 @@ package com.group.receiptapp.security;
 import com.group.receiptapp.domain.member.Member;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Collections;
 
 @Getter
 public class CustomUserDetails implements UserDetails {
@@ -18,7 +21,9 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null; // 권한 필요 시 구현
+        // isAdmin 값에 따라 권한 설정
+        String role = member.isAdmin() ? "ROLE_ADMIN" : "ROLE_USER";
+        return Collections.singletonList(new SimpleGrantedAuthority(role));
     }
 
     @Override

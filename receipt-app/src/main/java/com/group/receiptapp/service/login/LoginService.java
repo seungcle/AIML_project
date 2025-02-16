@@ -8,6 +8,7 @@ import com.group.receiptapp.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -29,6 +30,13 @@ public class LoginService {
                 .orElse(null);
     }
 
+    @Transactional(readOnly = true)
+    public Long getMemberIdByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .map(Member::getId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 가진 회원이 존재하지 않습니다."));
+    }
+
     // 리프레시 토큰 발급
     public String generateRefreshToken(Member member) {
         // 기존 리프레시 토큰이 존재하면 삭제
@@ -43,10 +51,8 @@ public class LoginService {
         return refreshToken;
     }
 
-    public void invalidateRefreshToken(String refreshToken) {
-        RefreshToken token = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() -> new NoSuchElementException("해당 토큰이 존재하지 않습니다: " + refreshToken));
-
-        refreshTokenRepository.delete(token); // 해당 토큰 삭제
+    @Transactional
+    public void invalidateRefreshTokenByMemberId(Long memberId) {
+        refreshTokenRepository.deleteByMemberId(memberId);
     }
 }

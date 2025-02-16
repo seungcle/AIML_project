@@ -3,6 +3,8 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+      file-size-threshold: 2MB
+      location: D:/custom_temp
   mail:
     host: smtp.gmail.com
     port: 587
@@ -37,6 +39,9 @@ spring:
     basename: messages
   jwt:
     secret-key: ${JWT_SECRET_KEY}
+
+receipt:
+  image-path: D:/custom_temp
 
 logging:
   level:
@@ -89,6 +94,9 @@ spring:
     basename: messages
   jwt:
     secret-key: ${JWT_SECRET_KEY}
+
+receipt:
+  image-path: "/home/ec2-user/receipt-app/uploads/"
 
 logging:
   level:

@@ -3,7 +3,9 @@ package com.group.receiptapp.controller.login;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.security.JwtUtil;
 import com.group.receiptapp.service.login.LoginService;
+import com.group.receiptapp.service.notification.NotificationService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,18 +16,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller // HTML 렌더링을 위해 Controller 사용
+@RestController // JSON 응답을 반환하는 REST 컨트롤러
+@RequiredArgsConstructor // final 필드 자동 주입
 @Slf4j
 @RequestMapping("/login") // 경로 지정
 public class LoginController {
 
     private final LoginService loginService;
-    private final JwtUtil jwtUtil; // JwtUtil 변수 선언
-
-    public LoginController(LoginService loginService, JwtUtil jwtUtil) {
-        this.loginService = loginService; // LoginService 주입
-        this.jwtUtil = jwtUtil; // JwtUtil 주입
-    }
+    private final JwtUtil jwtUtil;
+    private final NotificationService notificationService;
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> request, BindingResult result) {
@@ -50,12 +49,16 @@ public class LoginController {
         String refreshToken = loginService.generateRefreshToken(loginMember); // 리프레시 토큰 생성 및 DB 저장
         String accessToken = jwtUtil.generateToken(loginMember.getEmail()); // JWT 생성
 
+        // SSE 구독
+        String sseSubscribeUrl = "/notification/subscribe/" + loginMember.getId();
+
         // JSON 응답 생성
         Map<String, Object> response = new HashMap<>();
         response.put("id", loginMember.getId());
         response.put("email", loginMember.getEmail());
         response.put("refresh_token", refreshToken);
         response.put("access_token", accessToken);
+        response.put("sse_url", sseSubscribeUrl);
 
         return ResponseEntity.ok(response); // JSON 응답 반환
     }

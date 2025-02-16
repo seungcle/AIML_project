@@ -9,6 +9,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "receipt")
@@ -54,11 +56,25 @@ public class Receipt {
     @JoinColumn(name = "image_id")
     private ReceiptImage receiptImage; // 영수증 이미지와의 관계
 
+    @OneToMany(mappedBy = "receipt", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<ReceiptItem> items = new ArrayList<>(); // 품목 리스트
+
     public Long getImageId() {
         return receiptImage != null ? receiptImage.getId() : null; // receiptImage가 null이 아니면 그 id를 반환, null이면 null 반환
     }
 
     public Long getCategoryId() {
         return category != null ? category.getId() : null; // category가 null이 아니면 그 id를 반환, null이면 null 반환
+    }
+
+    public String getImagePath() {
+        return receiptImage != null ? receiptImage.getFilePath() : null; // 이미지 경로 반환
+    }
+
+    public void setImagePath(String imagePath) {
+        if (receiptImage == null) {
+            receiptImage = new ReceiptImage(); // 이미지 엔티티가 없으면 생성
+        }
+        receiptImage.setFilePath(imagePath); // 이미지 경로 설정
     }
 }
