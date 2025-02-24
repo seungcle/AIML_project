@@ -4,6 +4,7 @@ import com.group.receiptapp.domain.group.Group;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.repository.group.GroupRepository;
 import com.group.receiptapp.repository.member.MemberRepository;
+import com.group.receiptapp.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final GroupRepository groupRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     /* 회원가입 */
     @Transactional
@@ -72,4 +74,12 @@ public class MemberService {
         memberRepository.save(member);  // 회원 정보 저장
     }
 
+    // 회원 탈퇴
+    public void deleteAccount(String token) {
+        String email = jwtUtil.extractUsername(token); // JwtUtil 사용
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
+
+        member.deactivate(); // 회원 탈퇴 처리 (isActive = false)
+    }
 }

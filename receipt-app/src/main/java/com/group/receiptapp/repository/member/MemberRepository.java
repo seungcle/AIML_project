@@ -19,4 +19,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findByGroupId(Long groupId);
 
     List<Member> findByGroup(Group group);
+
+    // 탈퇴하지 않은 회원 조회
+    List<Member> findAllByIsActiveTrue();
 }
