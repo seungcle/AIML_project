@@ -38,6 +38,12 @@ public class MemberController {
         }
     }
 
+    @PostMapping("/delete-account")
+    public ResponseEntity<String> deleteAccount(@RequestHeader("Authorization") String token) {
+        memberService.deleteAccount(token);
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    }
+
     @GetMapping("/current")
     public ResponseEntity<MemberResponse> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails == null || userDetails.getMember() == null) {
