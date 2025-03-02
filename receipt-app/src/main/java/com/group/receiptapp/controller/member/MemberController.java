@@ -38,9 +38,13 @@ public class MemberController {
         }
     }
 
-    @PostMapping("/delete-account")
+    @DeleteMapping("/delete-account")
     public ResponseEntity<String> deleteAccount(@RequestHeader("Authorization") String token) {
-        memberService.deleteAccount(token);
+        // JWT 값만 추출
+        String jwt = token.startsWith("Bearer ") ? token.substring(7) : token;
+
+        memberService.deleteAccount(jwt);
+
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 
