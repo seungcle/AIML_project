@@ -19,6 +19,7 @@ public class GroupResponse {
         this.id = group.getId();
         this.name = group.getName();
         this.members = group.getMembers().stream()
+                .filter(Member::isActive)
                 .map(MemberResponse::new)
                 .collect(Collectors.toList());
     }

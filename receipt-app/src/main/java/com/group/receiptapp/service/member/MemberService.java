@@ -4,6 +4,7 @@ import com.group.receiptapp.domain.group.Group;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.repository.group.GroupRepository;
 import com.group.receiptapp.repository.member.MemberRepository;
+import com.group.receiptapp.repository.member.RefreshTokenRepository;
 import com.group.receiptapp.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final GroupRepository groupRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
 
     /* 회원가입 */
@@ -81,5 +83,6 @@ public class MemberService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
 
         member.deactivate(); // 회원 탈퇴 처리 (isActive = false)
+        refreshTokenRepository.deleteByMemberId(member.getId());
     }
 }
