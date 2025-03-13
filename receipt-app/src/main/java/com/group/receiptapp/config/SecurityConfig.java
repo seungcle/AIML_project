@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.http.HttpMethod;
 
 import java.io.IOException;
 
@@ -59,6 +61,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/add", "/login", "/member/signup", "/css/**", "/js/**", "/logo192.png", "/error").permitAll()
                         .requestMatchers("/logout", "/images/**").authenticated() // 로그아웃 엔드포인트에 대해 인증 요구
+                        .requestMatchers(HttpMethod.GET, "/home").authenticated()
                         .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll() // 특정 경로 화이트리스트 설정
                         .requestMatchers("/member/current").authenticated()
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증을 요구
