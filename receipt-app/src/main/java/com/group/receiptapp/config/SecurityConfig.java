@@ -55,22 +55,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
-                .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource())) // CORS 설정 추가
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/add", "/login", "/member/signup", "/css/**", "/js/**", "/logo192.png", "/error").permitAll()
-                        .requestMatchers("/logout", "/images/**").authenticated() // 로그아웃 엔드포인트에 대해 인증 요구
-                        .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll() // 특정 경로 화이트리스트 설정
-                        .requestMatchers("/index.html").denyAll()
+                        .requestMatchers("/", "/login", "/member/signup", "/css/**", "/js/**", "/logo192.png").permitAll()
+                        .requestMatchers("/logout", "/images/**").authenticated()
+                        .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll()
                         .requestMatchers("/member/current").authenticated()
-                        .anyRequest().authenticated() // 그 외 모든 요청은 인증을 요구
+                        .requestMatchers("/index.html").denyAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(customUserDetailsService)
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션을 사용하지 않고 토큰만 사용
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .logout(AbstractHttpConfigurer::disable); // 기본 로그아웃 메커니즘 비활성화
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.sendRedirect("/error");
+                        })
+                )
+                .logout(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
