@@ -1,4 +1,7 @@
 spring:
+  web:
+    resources:
+      static-locations: classpath:/static/
   servlet:
     multipart:
       max-file-size: 10MB
@@ -56,7 +59,10 @@ clova:
     url: "https://djyhuy4mnd.apigw.ntruss.com/custom/v1/35910/c9c51c7e47ecae4852bf3de8a921c33abd6369260f7538fd01fe2f4cd5f90676/document/receipt" # Clova OCR API URL
 ---
 spring:
-  ervlet:
+  web:
+    resources:
+      static-locations: classpath:/static/
+  servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
