@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll()
                         .requestMatchers("/member/current").authenticated()
                         .requestMatchers("/index.html").denyAll()
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
@@ -72,7 +73,10 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.sendRedirect("/error");
+                            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+                        })
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized Access");
                         })
                 )
                 .logout(AbstractHttpConfigurer::disable);
