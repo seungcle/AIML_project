@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/index.html").denyAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
+
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(customUserDetailsService)
