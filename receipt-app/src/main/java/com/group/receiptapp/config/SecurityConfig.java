@@ -61,7 +61,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/add", "/login", "/member/signup", "/css/**", "/js/**", "/logo192.png", "/error").permitAll()
                         .requestMatchers("/logout", "/images/**").authenticated() // 로그아웃 엔드포인트에 대해 인증 요구
-                        .requestMatchers(HttpMethod.GET, "/home").authenticated()
+                        .requestMatchers("/", "/home", "/error").permitAll()
                         .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll() // 특정 경로 화이트리스트 설정
                         .requestMatchers("/member/current").authenticated()
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증을 요구
