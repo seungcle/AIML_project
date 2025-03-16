@@ -58,14 +58,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/login", "/member/signup", "/css/**", "/js/**", "/logo192.png").permitAll()
+                        .requestMatchers("/", "/error").permitAll()
+                        .requestMatchers("/login", "/member/signup", "/css/**", "/js/**", "/logo192.png").permitAll()
                         .requestMatchers("/logout", "/images/**").authenticated()
                         .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll()
                         .requestMatchers("/member/current").authenticated()
-                        .requestMatchers("/index.html").denyAll()
-                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
-
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(customUserDetailsService)
