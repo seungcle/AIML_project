@@ -57,15 +57,15 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource())) // CORS 설정 추가
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/add", "/login", "/member/signup", "/css/**", "/js/**", "/logo192.png", "/error").permitAll()
                         .requestMatchers("/logout", "/images/**").authenticated() // 로그아웃 엔드포인트에 대해 인증 요구
-                        .requestMatchers("/", "/home", "/error").permitAll()
+                        .requestMatchers("/", "/error").permitAll()
                         .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll() // 특정 경로 화이트리스트 설정
                         .requestMatchers("/member/current").authenticated()
                         .anyRequest().authenticated() // 그 외 모든 요청은 인증을 요구
                 )
+                .addFilterAfter(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(customUserDetailsService)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // 세션을 사용하지 않고 토큰만 사용
