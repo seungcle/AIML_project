@@ -58,12 +58,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/login", "/member/signup", "/css/**", "/js/**", "/logo192.png").permitAll()
-                        .requestMatchers("/logout", "/images/**").authenticated()
-                        .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll()
-                        .requestMatchers("/member/current").authenticated()
-                        .requestMatchers("/index.html").denyAll()
-                        .anyRequest().authenticated()
+                .requestMatchers("/", "/error").permitAll()
+                .requestMatchers("/login", "/member/signup", "/css/**", "/js/**", "/logo192.png").permitAll()
+                .requestMatchers("/logout", "/images/**").authenticated()
+                .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll()
+                .requestMatchers("/member/current").authenticated()
+                .requestMatchers("/index.html").denyAll()
+                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .userDetailsService(customUserDetailsService)
@@ -71,9 +72,12 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.sendRedirect("/error");
-                        })
+                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+                })
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized Access");
+                })
                 )
                 .logout(AbstractHttpConfigurer::disable);
 
