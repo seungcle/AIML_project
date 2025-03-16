@@ -9,6 +9,6 @@ public class RootController {
 
     @GetMapping("/")
     public ResponseEntity<String> home() {
-        return ResponseEntity.ok("Server page !!");
+        return ResponseEntity.ok("Server page !!!");
     }
 }

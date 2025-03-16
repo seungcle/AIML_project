@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/error").permitAll() // `/error` 허용하여 Whitelabel Error Page 정상 동작
+                        .requestMatchers("/", "/error").permitAll()
                         .requestMatchers("/login", "/member/signup", "/css/**", "/js/**", "/logo192.png").permitAll()
                         .requestMatchers("/logout", "/images/**").authenticated()
                         .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll()
