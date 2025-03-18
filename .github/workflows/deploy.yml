@@ -35,10 +35,13 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem receipt-app/build/libs/receipt-app-0.0.1-SNAPSHOT.jar $USER@$HOST:/home/ec2-user/receipt-app/
+
           ssh -i private_key.pem $USER@$HOST << 'EOF'
-            cd /home/ec2-user/receipt-app
+            cd AIML_project/receipt-app
+            git pull origin main
+            ./gradlew build -x test
             pkill -f 'receipt-app-0.0.1-SNAPSHOT.jar' || true
-            nohup java -jar receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> app.log 2>&1 &
+            nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> nohup.out 2>&1 &
           EOF
+
           rm -f private_key.pem
