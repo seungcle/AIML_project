@@ -49,20 +49,26 @@ jobs:
             if [ -n "\$PIDS" ]; then
               echo "Existing process found: \$PIDS"
               kill -9 \$PIDS
-              echo "Process \$PIDS killed."
+              sleep 2
+              # 강제로 종료되지 않은 경우 다시 종료 시도
+              PIDS=\$(pgrep -f 'receipt-app-0.0.1-SNAPSHOT.jar')
+              if [ -n "\$PIDS" ]; then
+                echo "Process still running after kill, force killing: \$PIDS"
+                kill -9 \$PIDS
+              else
+                echo "Process successfully killed."
+              fi
             else
               echo "No existing process found."
             fi
             sleep 3
       
             echo "Starting new application instance..."
-            nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev > ~/receipt-app.log 2>&1 &
-            echo "Application started in background."
+            nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> ~/receipt-app.log 2>&1 &
+            sleep 5
       
-            sleep 5  # 애플리케이션 실행 대기
-      
-            echo "Checking running processes..."
+            echo "Deployment completed!"
             ps aux | grep 'receipt-app-0.0.1-SNAPSHOT.jar'
-            echo "Last 20 lines of application log:"
+            echo "Application log:"
             tail -n 20 ~/receipt-app.log
           EOF
