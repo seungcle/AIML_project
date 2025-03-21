@@ -5,8 +5,9 @@ on:
     branches:
       - main
     paths:
-      - 'receipt-app/**' 
-
+      - 'receipt-app/**'
+  workflow_dispatch:
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest
