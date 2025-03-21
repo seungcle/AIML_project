@@ -7,7 +7,7 @@ on:
     paths:
       - 'receipt-app/**'
   workflow_dispatch:
-  
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -35,38 +35,46 @@ jobs:
           USER: ${{ secrets.EC2_USER }}
         run: |
           echo "Starting SSH Key Debugging..."
+
           echo "Printing first few lines of PRIVATE_KEY for verification:"
           echo "$PRIVATE_KEY" | head -n 5
-
           echo "Writing SSH key to private_key.pem"
           echo -e "$PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
 
           echo "Validating private key file..."
-          if ! ssh-keygen -y -f private_key.pem > /dev/null 2>&1; then
+          ssh-keygen -y -f private_key.pem > /dev/null 2>&1
+          if [ $? -eq 0 ]; then
+            echo "Private key file validation passed!"
+          else
             echo "Private key validation failed. Please check your SSH key format."
             exit 1
           fi
-          echo "Private key file validation passed!"
 
           echo "Checking SSH connection to $HOST..."
-          ssh -v -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST "echo 'SSH connection 성공'"
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST "echo 'SSH connection 성공'"
           if [ $? -ne 0 ]; then
             echo "SSH connection 실패"
             exit 1
           fi
 
-          echo "Deploying application"
+          echo "Deploying application to EC2..."
           ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            cd AIML_project/receipt-app
+            echo "Navigating to application directory..."
+            cd AIML_project/receipt-app || exit 1
+
             echo "Pulling latest changes from GitHub..."
             git pull origin main
+
             echo "Building the application..."
             ./gradlew build -x test
+
             echo "Stopping existing application process..."
             pkill -f 'receipt-app-0.0.1-SNAPSHOT.jar' || true
+
             echo "Starting new application instance..."
             nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> nohup.out 2>&1 &
+
             echo "Deployment completed!"
           EOF
 
