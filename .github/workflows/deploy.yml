@@ -3,63 +3,36 @@ name: Deploy Receipt-App to EC2
 on:
   push:
     branches:
-      - main
+      - main  # 배포할 브랜치
     paths:
-      - 'receipt-app/**'
-  workflow_dispatch:
+      - 'receipt-app/**'  # 변경된 파일이 receipt-app 관련일 때만 배포
+  workflow_dispatch:  # 수동으로 워크플로우 실행 가능
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Ubuntu 환경에서 실행
 
     steps:
+      # 1. Repository Checkout
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3  # 리포지토리 체크아웃
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Build receipt-app with Gradle
+      # 2. SSH 키 설정
+      - name: Set up SSH key
         run: |
-          cd receipt-app
-          chmod +x gradlew
-          ./gradlew build -x test
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa  # GitHub Secrets에 등록된 개인 키 사용
+          chmod 600 ~/.ssh/id_rsa  # 개인 키의 권한을 600으로 설정
 
-      - name: Deploy receipt-app to EC2
-        env:
-          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          HOST: ${{ secrets.EC2_HOST }}
-          USER: ${{ secrets.EC2_USER }}
+      # 3. EC2 서버의 공개 키 등록 (known_hosts 파일에 추가)
+      - name: Add known host
         run: |
-          echo "Starting SSH Key Debugging..."
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts  # EC2 서버의 공개 키를 확인하여 known_hosts에 추가
 
-          echo "Printing first few lines of PRIVATE_KEY for verification:"
-          echo "$PRIVATE_KEY" | head -n 5
-          echo "Writing SSH key to private_key.pem"
-          echo -e "$PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-
-          echo "Validating private key file..."
-          ssh-keygen -y -f private_key.pem > /dev/null 2>&1
-          if [ $? -eq 0 ]; then
-            echo "Private key file validation passed!"
-          else
-            echo "Private key validation failed. Please check your SSH key format."
-            exit 1
-          fi
-
-          echo "Checking SSH connection to $HOST..."
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST "echo 'SSH connection 성공'"
-          if [ $? -ne 0 ]; then
-            echo "SSH connection 실패"
-            exit 1
-          fi
-
-          echo "Deploying application to EC2..."
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+      # 4. EC2에 접속하여 애플리케이션 배포
+      - name: Deploy to EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
             echo "Navigating to application directory..."
             cd AIML_project/receipt-app || exit 1
 
@@ -77,6 +50,3 @@ jobs:
 
             echo "Deployment completed!"
           EOF
-
-          echo "Cleaning up SSH key file"
-          rm -f private_key.pem
