@@ -46,6 +46,13 @@ jobs:
             pkill -f 'receipt-app-0.0.1-SNAPSHOT.jar' || true
             sleep 3
       
+            # 남아있는 프로세스 강제 종료
+            PIDS=\$(pgrep -f 'receipt-app-0.0.1-SNAPSHOT.jar')
+            if [ -n "\$PIDS" ]; then
+              echo "Force killing remaining processes..."
+              kill -9 \$PIDS
+            fi
+      
             echo "Starting new application instance..."
             nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> ~/receipt-app.log 2>&1 &
       
