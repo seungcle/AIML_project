@@ -32,7 +32,7 @@ jobs:
       # 4. EC2에 접속하여 애플리케이션 배포
       - name: Deploy to EC2
         run: |
-          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=120 -tt -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -o ServerAliveInterval=120 -o ServerAliveCountMax=120 -tt -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
             set -e  # 오류 발생 시 즉시 종료
       
             # 로그 파일 경로
@@ -61,7 +61,14 @@ jobs:
               echo "Existing process found: \$PIDS" >> $LOG_FILE
               kill -9 \$PIDS >> $LOG_FILE 2>&1
               sleep 3
-              echo "Process \$PIDS killed." >> $LOG_FILE
+              # 강제로 종료되지 않은 경우 다시 종료 시도
+              PIDS=\$(pgrep -f 'receipt-app-0.0.1-SNAPSHOT.jar')
+              if [ -n "\$PIDS" ]; then
+                echo "Process still running after kill, force killing: \$PIDS" >> $LOG_FILE
+                kill -9 \$PIDS >> $LOG_FILE 2>&1
+              else
+                echo "Process successfully killed." >> $LOG_FILE
+              fi
             else
               echo "No existing process found." >> $LOG_FILE
             fi
@@ -69,15 +76,14 @@ jobs:
       
             echo "Starting new application instance..." >> $LOG_FILE
             nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> ~/receipt-app.log 2>&1 &
-            echo "Application started." >> $LOG_FILE
+            echo "Application started with PID \$!" >> $LOG_FILE
             sleep 5
       
             echo "Deployment completed!" >> $LOG_FILE
             ps aux | grep 'receipt-app-0.0.1-SNAPSHOT.jar' >> $LOG_FILE
-            echo "Application log:" >> $LOG_FILE
+            echo "Application log (last 20 lines):" >> $LOG_FILE
             tail -n 20 ~/receipt-app.log >> $LOG_FILE
       
-            # 로그 파일 확인
+            # GitHub Actions로 로그 전송
             cat $LOG_FILE
           EOF
-
