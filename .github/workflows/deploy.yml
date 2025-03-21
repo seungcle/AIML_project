@@ -35,18 +35,23 @@ jobs:
           ssh -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
             echo "Navigating to application directory..."
             cd AIML_project/receipt-app || exit 1
-
+      
             echo "Pulling latest changes from GitHub..."
             git pull origin main
-
+      
             echo "Building the application..."
             ./gradlew build -x test
-
+      
             echo "Stopping existing application process..."
             pkill -f 'receipt-app-0.0.1-SNAPSHOT.jar' || true
-
+            sleep 3
+      
             echo "Starting new application instance..."
-            nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> nohup.out 2>&1 &
-
+            nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> ~/receipt-app.log 2>&1 &
+      
             echo "Deployment completed!"
+      
+            # 프로세스 확인
+            ps aux | grep 'receipt-app-0.0.1-SNAPSHOT.jar'
+            tail -n 20 ~/receipt-app.log
           EOF
