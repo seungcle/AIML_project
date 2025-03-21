@@ -28,57 +28,55 @@ jobs:
       - name: Add known host
         run: |
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-
-     # 4. EC2에 접속하여 애플리케이션 배포
+          
+      # 4. EC2에 접속하여 애플리케이션 배포
       - name: Deploy to EC2
         run: |
-          ssh -o ServerAliveInterval=120 -o ServerAliveCountMax=120 -tt -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-            set -e  # 오류 발생 시 즉시 종료
-      
-            # 로그 파일 경로
-            LOG_FILE=~/deployment.log
-      
-            echo "=== Deploying application ===" > $LOG_FILE
-      
-            echo "Navigating to application directory..." >> $LOG_FILE
-            cd AIML_project/receipt-app || exit 1
-      
-            echo "Pulling latest changes from GitHub..." >> $LOG_FILE
-            git pull origin main >> $LOG_FILE 2>&1
-      
-            echo "Building the application..." >> $LOG_FILE
-            ./gradlew build -x test >> $LOG_FILE 2>&1
-            BUILD_STATUS=$?
-            if [ $BUILD_STATUS -ne 0 ]; then
-              echo "Build failed with status $BUILD_STATUS" >> $LOG_FILE
-              exit 1
-            fi
-            echo "Build completed successfully." >> $LOG_FILE
-      
-            echo "Stopping existing application process..." >> $LOG_FILE
-            PIDS=\$(pgrep -f 'receipt-app-0.0.1-SNAPSHOT.jar')
-            if [ -n "\$PIDS" ]; then
-              echo "Existing process found: \$PIDS" >> $LOG_FILE
-              kill -9 \$PIDS >> $LOG_FILE 2>&1
-              sleep 3
-              echo "Process \$PIDS killed." >> $LOG_FILE
-            else
-              echo "No existing process found." >> $LOG_FILE
-            fi
-            sleep 3
-      
-            echo "Starting new application instance..." >> $LOG_FILE
-            nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> ~/receipt-app.log 2>&1 &
-            disown
-            echo "Application started with PID \$!" >> $LOG_FILE
-            sleep 5
-      
-            echo "Deployment completed!" >> $LOG_FILE
-            ps aux | grep 'receipt-app-0.0.1-SNAPSHOT.jar' >> $LOG_FILE
-            echo "Application log (last 20 lines):" >> $LOG_FILE
-            tail -n 20 ~/receipt-app.log >> $LOG_FILE
-      
-            # GitHub Actions로 로그 전송
-            cat $LOG_FILE
-          EOF     
-            
+          ssh -o ServerAliveInterval=120 -o ServerAliveCountMax=120 -tt -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} <<EOF
+set -e  # 오류 발생 시 즉시 종료
+
+# 로그 파일 경로
+LOG_FILE=~/deployment.log
+
+echo "=== Deploying application ===" > $LOG_FILE
+
+echo "Navigating to application directory..." >> $LOG_FILE
+cd AIML_project/receipt-app || exit 1
+
+echo "Pulling latest changes from GitHub..." >> $LOG_FILE
+git pull origin main >> $LOG_FILE 2>&1
+
+echo "Building the application..." >> $LOG_FILE
+./gradlew build -x test >> $LOG_FILE 2>&1
+BUILD_STATUS=$?
+if [ $BUILD_STATUS -ne 0 ]; then
+  echo "Build failed with status $BUILD_STATUS" >> $LOG_FILE
+  exit 1
+fi
+echo "Build completed successfully." >> $LOG_FILE
+
+echo "Stopping existing application process..." >> $LOG_FILE
+PIDS=\$(pgrep -f 'receipt-app-0.0.1-SNAPSHOT.jar')
+if [ -n "\$PIDS" ]; then
+  echo "Existing process found: \$PIDS" >> $LOG_FILE
+  kill -9 \$PIDS >> $LOG_FILE 2>&1
+  sleep 3
+  echo "Process \$PIDS killed." >> $LOG_FILE
+else
+  echo "No existing process found." >> $LOG_FILE
+fi
+sleep 3
+
+echo "Starting new application instance..." >> $LOG_FILE
+nohup java -jar build/libs/receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> ~/receipt-app.log 2>&1 &
+echo "Application started with PID \$!" >> $LOG_FILE
+sleep 5
+
+echo "Deployment completed!" >> $LOG_FILE
+ps aux | grep 'receipt-app-0.0.1-SNAPSHOT.jar' >> $LOG_FILE
+echo "Application log (last 20 lines):" >> $LOG_FILE
+tail -n 20 ~/receipt-app.log >> $LOG_FILE
+
+# GitHub Actions로 로그 전송
+cat $LOG_FILE
+EOF
