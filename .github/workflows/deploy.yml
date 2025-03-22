@@ -26,20 +26,7 @@ jobs:
           ./gradlew clean build -x test
           ls -al build/libs  # 빌드 산출물 확인
 
-      # 3. Upload the JAR file as an artifact
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: receipt-app
-          path: receipt-app/build/libs/receipt-app-0.0.1-SNAPSHOT.jar
-
-      # 4. Download artifact before deployment
-      - name: Download artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: receipt-app
-
-      # 5. Transfer JAR to EC2 using SCP
+      # 3. Transfer JAR to EC2 using SCP
       - name: Transfer JAR file to EC2
         uses: appleboy/scp-action@v0.1.1
         with:
@@ -47,10 +34,10 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          source: receipt-app-0.0.1-SNAPSHOT.jar
+          source: receipt-app/build/libs/receipt-app-0.0.1-SNAPSHOT.jar
           target: /home/ec2-user/AIML_project/receipt-app/build/libs/
 
-      # 6. Restart the application on EC2
+      # 4. Restart the application on EC2
       - name: Restart application on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -92,3 +79,4 @@ jobs:
 
             echo "Deployment completed!" >> $LOG_FILE
             tail -n 20 $LOG_FILE
+
