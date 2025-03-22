@@ -28,14 +28,14 @@ jobs:
 
       # 3. Upload the JAR file as an artifact
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: receipt-app
           path: receipt-app/build/libs/receipt-app-0.0.1-SNAPSHOT.jar
 
       # 4. Download artifact before deployment
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v2
         with:
           name: receipt-app
 
