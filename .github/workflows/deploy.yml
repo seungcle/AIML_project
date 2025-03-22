@@ -11,6 +11,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 60  # 전체 타임아웃 60분으로 설정
 
     steps:
       # 1. Repository Checkout
@@ -32,7 +33,7 @@ jobs:
       # 4. EC2에 접속하여 애플리케이션 배포
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=240 -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
             set -e  # 오류 발생 시 즉시 종료
             LOG_FILE=~/deployment.log
             APP_LOG_FILE=~/receipt-app.log
@@ -45,7 +46,7 @@ jobs:
             git pull origin main >> $LOG_FILE 2>&1
 
             echo "Building the application (skipping tests)..." >> $LOG_FILE
-            ./gradlew build -x test >> $LOG_FILE 2>&1
+            ./gradlew --build-cache build -x test >> $LOG_FILE 2>&1
             BUILD_STATUS=$?
             if [ $BUILD_STATUS -ne 0 ]; then
               echo "Build failed with status $BUILD_STATUS" >> $LOG_FILE
