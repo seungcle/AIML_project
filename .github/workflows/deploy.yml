@@ -25,7 +25,7 @@ jobs:
           chmod +x ./gradlew
           ./gradlew clean build -x test
           ls -al build/libs  # 빌드 산출물 확인
-
+          
       # 3. Disable strict host key checking
       - name: Disable strict host key checking
         run: |
@@ -57,6 +57,9 @@ jobs:
             set -e
             JAR_NAME=receipt-app-0.0.1-SNAPSHOT.jar
             
+            # 메모리 캐시 정리
+            sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
+
             # 기존 프로세스 종료
             PIDS=$(pgrep -f "$JAR_NAME")
             if [ -n "$PIDS" ]; then
