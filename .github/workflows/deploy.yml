@@ -11,7 +11,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 60  # 전체 타임아웃 60분으로 설정
 
     steps:
       # 1. Repository Checkout
@@ -24,7 +24,7 @@ jobs:
           cd receipt-app
           chmod +x ./gradlew
           ./gradlew clean build -x test
-          ls -al build/libs
+          ls -al build/libs  # 빌드 산출물 확인
 
       # 3. Disable strict host key checking
       - name: Disable strict host key checking
@@ -56,20 +56,20 @@ jobs:
           script: |
             set -e
             JAR_NAME=receipt-app-0.0.1-SNAPSHOT.jar
-            
-            # 메모리 캐시 정리
-            sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
-            
-            # 기존 프로세스 종료
+
+            echo "Stopping any existing process"
             PIDS=$(pgrep -f "$JAR_NAME")
             if [ -n "$PIDS" ]; then
+              echo "Stopping existing process: $PIDS"
               kill -9 $PIDS
             fi
+
+            echo "Clearing memory cache"
+            sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
+
+            echo "Starting new application"
+            nohup java -Xms32m -Xmx64m -XX:+UseZGC -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev >> /home/ec2-user/receipt-app.log 2>&1 &
             
-            # 로그 파일 삭제로 공간 확보
-            if [ -f /home/ec2-user/receipt-app.log ]; then
-              sudo rm /home/ec2-user/receipt-app.log
-            fi
-            
-            # 로그 출력을 파일로 남기기
-            nohup java -Xms64m -Xmx128m -XX:+UseG1GC -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev > /home/ec2-user/receipt-app.log 2>&1 &
+            echo "Verifying process startup"
+            sleep 3
+            pgrep -f "$JAR_NAME" && echo "Application started successfully" || echo "Application failed to start"
