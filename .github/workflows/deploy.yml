@@ -25,7 +25,7 @@ jobs:
           chmod +x ./gradlew
           ./gradlew clean build -x test
           ls -al build/libs  # 빌드 산출물 확인
-          
+
       # 3. Disable strict host key checking
       - name: Disable strict host key checking
         run: |
@@ -58,23 +58,13 @@ jobs:
             JAR_NAME=receipt-app-0.0.1-SNAPSHOT.jar
             
             # 메모리 캐시 정리
-            echo "Clearing cache..." 
             sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
-            
-            # 스왑 메모리 확인
-            echo "Checking swap status..." 
-            sudo swapon --show
             
             # 기존 프로세스 종료
             PIDS=$(pgrep -f "$JAR_NAME")
             if [ -n "$PIDS" ]; then
-              echo "Killing existing process: $PIDS"
               kill -9 $PIDS
-            else
-              echo "No existing process found."
             fi
             
-            # 로그 출력을 없애고 애플리케이션 실행
-            echo "Starting new application instance..." 
-            nohup java -Xms256m -Xmx512m -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev >/dev/null 2>&1 &
-            echo "Application started with PID: $!"
+            # 메모리 최적화 JVM 설정 적용
+            nohup java -Xms64m -Xmx128m -XX:+UseZGC -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev >/dev/null 2>&1 &
