@@ -18,26 +18,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. SSH Key 설정
-      - name: Configure SSH Key
-        env:
-          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo "Host *" > ~/.ssh/config
-          echo "    StrictHostKeyChecking no" >> ~/.ssh/config
-
-      # 3. Build with Gradle
+      # 2. Build the application
       - name: Build with Gradle
         run: |
           cd receipt-app
           chmod +x ./gradlew
           ./gradlew clean build -x test
+          ls -al build/libs  # 빌드 산출물 확인
 
-      # 4. Transfer JAR file to EC2
-      - name: Transfer JAR to EC2
+      # 3. Disable strict host key checking (추가된 부분)
+      - name: Disable strict host key checking
+        run: |
+          mkdir -p ~/.ssh
+          echo "Host *" > ~/.ssh/config
+          echo "    StrictHostKeyChecking no" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+
+      # 4. Transfer JAR to EC2 using SCP
+      - name: Transfer JAR file to EC2
         uses: appleboy/scp-action@v0.1.1
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -56,15 +54,36 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            set -e
             LOG_FILE=~/deployment.log
             APP_LOG_FILE=~/receipt-app.log
             JAR_NAME=receipt-app-0.0.1-SNAPSHOT.jar
 
-            echo "Stopping existing application..." >> $LOG_FILE
-            pkill -f "$JAR_NAME" || true
-            sleep 3
+            echo "Stopping existing application process..." >> $LOG_FILE
+            PIDS=$(pgrep -f "$JAR_NAME")
+            if [ -n "$PIDS" ]; then
+              echo "Existing process found: $PIDS" >> $LOG_FILE
+              kill -9 $PIDS
+              echo "Process $PIDS killed." >> $LOG_FILE
+            else
+              echo "No existing process found." >> $LOG_FILE
+            fi
 
-            echo "Starting new application..." >> $LOG_FILE
+            sleep 3
+            echo "Starting new application instance..." >> $LOG_FILE
             nohup java -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev >> $APP_LOG_FILE 2>&1 &
+            APP_PID=$!
+            echo "Application started with PID $APP_PID" >> $LOG_FILE
+            sleep 5
+
+            echo "Checking if the application is running..." >> $LOG_FILE
+            if ps -p $APP_PID > /dev/null; then
+              echo "Application is running with PID $APP_PID" >> $LOG_FILE
+            else
+              echo "Application failed to start." >> $LOG_FILE
+              tail -n 20 $APP_LOG_FILE >> $LOG_FILE
+              exit 1
+            fi
+
             echo "Deployment completed!" >> $LOG_FILE
             tail -n 20 $LOG_FILE
