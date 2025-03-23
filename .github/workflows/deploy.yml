@@ -11,7 +11,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 60  # 전체 타임아웃 60분으로 설정
 
     steps:
       # 1. Repository Checkout
@@ -26,7 +26,7 @@ jobs:
           ./gradlew clean build -x test
           ls -al build/libs  # 빌드 산출물 확인
 
-      # 3. Disable strict host key checking (추가된 부분)
+      # 3. Disable strict host key checking
       - name: Disable strict host key checking
         run: |
           mkdir -p ~/.ssh
@@ -47,7 +47,7 @@ jobs:
 
       # 5. Restart the application on EC2
       - name: Restart application on EC2
-        uses: appleboy/ssh-action@v0.1.6
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
@@ -55,35 +55,13 @@ jobs:
           port: 22
           script: |
             set -e
-            LOG_FILE=~/deployment.log
-            APP_LOG_FILE=~/receipt-app.log
             JAR_NAME=receipt-app-0.0.1-SNAPSHOT.jar
-
-            echo "Stopping existing application process..." >> $LOG_FILE
+            
+            # 기존 프로세스 종료
             PIDS=$(pgrep -f "$JAR_NAME")
             if [ -n "$PIDS" ]; then
-              echo "Existing process found: $PIDS" >> $LOG_FILE
               kill -9 $PIDS
-              echo "Process $PIDS killed." >> $LOG_FILE
-            else
-              echo "No existing process found." >> $LOG_FILE
             fi
 
-            sleep 3
-            echo "Starting new application instance..." >> $LOG_FILE
-            nohup java -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev >> $APP_LOG_FILE 2>&1 &
-            APP_PID=$!
-            echo "Application started with PID $APP_PID" >> $LOG_FILE
-            sleep 5
-
-            echo "Checking if the application is running..." >> $LOG_FILE
-            if ps -p $APP_PID > /dev/null; then
-              echo "Application is running with PID $APP_PID" >> $LOG_FILE
-            else
-              echo "Application failed to start." >> $LOG_FILE
-              tail -n 20 $APP_LOG_FILE >> $LOG_FILE
-              exit 1
-            fi
-
-            echo "Deployment completed!" >> $LOG_FILE
-            tail -n 20 $LOG_FILE
+            # 로그 출력을 없애고 애플리케이션 실행
+            nohup java -Xms256m -Xmx512m -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev >/dev/null 2>&1 &
