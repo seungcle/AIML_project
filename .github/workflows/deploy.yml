@@ -18,7 +18,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Build the application
+      # 2. Set up SSH key
+      - name: Configure SSH key
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > /home/runner/.ssh/id_rsa
+          chmod 600 /home/runner/.ssh/id_rsa
+          echo "Host *" > /home/runner/.ssh/config
+          echo "    StrictHostKeyChecking no" >> /home/runner/.ssh/config
+          chmod 600 /home/runner/.ssh/config
+
+      # 3. SSH Connection Test
+      - name: Test SSH Connection
+        run: ssh -i /home/runner/.ssh/id_rsa ec2-user@${{ secrets.EC2_HOST }} "echo SSH 연결 성공!"
+
+      # 4. Build the application
       - name: Build with Gradle
         run: |
           cd receipt-app
@@ -26,7 +39,7 @@ jobs:
           ./gradlew clean build -x test
           ls -al build/libs  # 빌드 산출물 확인
 
-      # 3. Transfer JAR to EC2 using SCP
+      # 5. Transfer JAR to EC2 using SCP
       - name: Transfer JAR file to EC2
         uses: appleboy/scp-action@v0.1.1
         with:
@@ -37,7 +50,7 @@ jobs:
           source: receipt-app/build/libs/receipt-app-0.0.1-SNAPSHOT.jar
           target: /home/ec2-user/AIML_project/receipt-app/build/libs/
 
-      # 4. Restart the application on EC2
+      # 6. Restart the application on EC2
       - name: Restart application on EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -79,4 +92,3 @@ jobs:
 
             echo "Deployment completed!" >> $LOG_FILE
             tail -n 20 $LOG_FILE
-
