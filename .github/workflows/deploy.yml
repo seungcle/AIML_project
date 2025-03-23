@@ -19,11 +19,11 @@ jobs:
         uses: actions/checkout@v3
 
       # 2. Build the application
-      - name: Build with Gradle
+      - name: Build with Gradle (No Daemon)
         run: |
           cd receipt-app
           chmod +x ./gradlew
-          ./gradlew clean build -x test
+          ./gradlew clean build --no-daemon -x test
           ls -al build/libs  # 빌드 산출물 확인
 
       # 3. Disable strict host key checking
@@ -56,20 +56,24 @@ jobs:
           script: |
             set -e
             JAR_NAME=receipt-app-0.0.1-SNAPSHOT.jar
-
+            
             echo "Stopping any existing process"
             PIDS=$(pgrep -f "$JAR_NAME")
             if [ -n "$PIDS" ]; then
               echo "Stopping existing process: $PIDS"
               kill -9 $PIDS
             fi
-
+            
             echo "Clearing memory cache"
             sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
 
-            echo "Starting new application"
-            nohup java -Xms32m -Xmx64m -XX:+UseZGC -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev >> /home/ec2-user/receipt-app.log 2>&1 &
-            
+            echo "Starting new application with Docker"
+            docker stop receipt-app || true
+            docker rm receipt-app || true
+            docker run -d --name receipt-app -m 512m --memory-swap 1g -p 8080:8080 \
+              -v /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME:/app.jar \
+              openjdk:17-jdk-alpine java -Xms64m -Xmx128m -XX:+UseZGC -jar /app.jar --spring.profiles.active=dev
+              
             echo "Verifying process startup"
             sleep 3
-            pgrep -f "$JAR_NAME" && echo "Application started successfully" || echo "Application failed to start"
+            docker ps | grep receipt-app && echo "Application started successfully" || echo "Application failed to start"
