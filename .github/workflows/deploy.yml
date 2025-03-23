@@ -11,7 +11,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # 전체 타임아웃 60분으로 설정
+    timeout-minutes: 60
 
     steps:
       # 1. Repository Checkout
@@ -24,7 +24,7 @@ jobs:
           cd receipt-app
           chmod +x ./gradlew
           ./gradlew clean build -x test
-          ls -al build/libs  # 빌드 산출물 확인
+          ls -al build/libs
 
       # 3. Disable strict host key checking
       - name: Disable strict host key checking
@@ -66,5 +66,10 @@ jobs:
               kill -9 $PIDS
             fi
             
-            # 메모리 최적화 JVM 설정 적용
-            nohup java -Xms64m -Xmx128m -XX:+UseZGC -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev >/dev/null 2>&1 &
+            # 로그 파일 삭제로 공간 확보
+            if [ -f /home/ec2-user/receipt-app.log ]; then
+              sudo rm /home/ec2-user/receipt-app.log
+            fi
+            
+            # 로그 출력을 파일로 남기기
+            nohup java -Xms64m -Xmx128m -XX:+UseG1GC -jar /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME --spring.profiles.active=dev > /home/ec2-user/receipt-app.log 2>&1 &
