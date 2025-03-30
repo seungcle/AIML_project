@@ -1,52 +1,42 @@
-name: Deploy Receipt-App to EC2
+name: CI/CD with Docker
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'receipt-app/**'
-  workflow_dispatch:
+      - 'receipt-app/**'  
+  workflow_dispatch:      
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # 전체 타임아웃 60분으로 설정
 
     steps:
-      # 1. Repository Checkout
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. Build the application
-      - name: Build with Gradle (No Daemon)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Gradle Build without Daemon
         run: |
           cd receipt-app
           chmod +x ./gradlew
-          ./gradlew clean build --no-daemon -x test
-          ls -al build/libs  # 빌드 산출물 확인
+          ./gradlew clean bootJar --no-daemon
 
-      # 3. Disable strict host key checking
-      - name: Disable strict host key checking
+      - name: Docker Build & Push
         run: |
-          mkdir -p ~/.ssh
-          echo "Host *" > ~/.ssh/config
-          echo "    StrictHostKeyChecking no" >> ~/.ssh/config
-          chmod 600 ~/.ssh/config
+          cd receipt-app
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker build -t receipt-app:latest .
+          docker tag receipt-app:latest ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
 
-      # 4. Transfer JAR to EC2 using SCP
-      - name: Transfer JAR file to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          source: receipt-app/build/libs/receipt-app-0.0.1-SNAPSHOT.jar
-          target: /home/ec2-user/AIML_project/receipt-app/build/libs/
-
-      # 5. Restart the application on EC2
-      - name: Restart application on EC2
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -54,26 +44,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            set -e
-            JAR_NAME=receipt-app-0.0.1-SNAPSHOT.jar
-            
-            echo "Stopping any existing process"
-            PIDS=$(pgrep -f "$JAR_NAME")
-            if [ -n "$PIDS" ]; then
-              echo "Stopping existing process: $PIDS"
-              kill -9 $PIDS
-            fi
-            
-            echo "Clearing memory cache"
-            sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
-
-            echo "Starting new application with Docker"
+            docker pull ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
             docker stop receipt-app || true
             docker rm receipt-app || true
-            docker run -d --name receipt-app -m 512m --memory-swap 1g -p 8080:8080 \
-              -v /home/ec2-user/AIML_project/receipt-app/build/libs/$JAR_NAME:/app.jar \
-              openjdk:17-jdk-alpine java -Xms64m -Xmx128m -XX:+UseZGC -jar /app.jar --spring.profiles.active=dev
-              
-            echo "Verifying process startup"
-            sleep 3
-            docker ps | grep receipt-app && echo "Application started successfully" || echo "Application failed to start"
+            docker run -d --name receipt-app -p 8080:8080 \
+              --restart always \
+              ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
+            docker image prune -f
