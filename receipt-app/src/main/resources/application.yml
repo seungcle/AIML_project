@@ -63,6 +63,10 @@ clova:
     url: "https://djyhuy4mnd.apigw.ntruss.com/custom/v1/35910/c9c51c7e47ecae4852bf3de8a921c33abd6369260f7538fd01fe2f4cd5f90676/document/receipt" # Clova OCR API URL
 ---
 spring:
+  config:
+    activate:
+      on-profile: dev
+
   web:
     resources:
       static-locations: classpath:/static/
@@ -70,10 +74,12 @@ spring:
         enabled: true
       cache:
         period: 3600
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -88,38 +94,36 @@ spring:
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
-  config:
-    activate:
-      on-profile: dev
+
   datasource:
-    url: "jdbc:mysql://3.36.81.80:3306/receipt"
-    username: "root"
-    password: "102604jh#*" # 실제 MySQL 비밀번호 입력
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
-      ddl-auto: none #   create-drop none
+      ddl-auto: none
     properties:
       hibernate:
         show_sql: true
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
-  messages:
-    basename: messages
+
   jwt:
     secret-key: ${JWT_SECRET_KEY}
 
 receipt:
-  image-path: "/home/ec2-user/receipt-app/uploads/"
+  image-path: ${RECEIPT_IMAGE_PATH}
 
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
-    org.springframework.security: DEBUG  # Spring Security 로그를 DEBUG 수준으로 설정
+    org.springframework.security: DEBUG
 
 clova:
   ocr:
-    client-id: "sm6pcc5t4e" # 발급받은 Client ID
-    client-secret: "SHZ5cmNhZ2lnTlhPWEZ4WmdpdkJ4SVFIa0JvekRxemY=" # 발급받은 Client Secret
-    url: "https://djyhuy4mnd.apigw.ntruss.com/custom/v1/35910/c9c51c7e47ecae4852bf3de8a921c33abd6369260f7538fd01fe2f4cd5f90676/document/receipt" # Clova OCR API URL
+    client-id: ${CLOVA_OCR_CLIENT_ID}
+    client-secret: ${CLOVA_OCR_CLIENT_SECRET}
+    url: ${CLOVA_OCR_URL}
