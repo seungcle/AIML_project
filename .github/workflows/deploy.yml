@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'receipt-app/**'  
-  workflow_dispatch:      
+      - 'receipt-app/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -45,7 +45,7 @@ jobs:
           port: 22
           script: |
             cat <<EOF > /home/ec2-user/receipt-app/.env
-            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            SPRING_JWT_SECRET_KEY=${{ secrets.SPRING_JWT_SECRET_KEY }}
             MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
             MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
             DB_USERNAME_LOCAL=${{ secrets.DB_USERNAME_LOCAL }}
@@ -61,10 +61,15 @@ jobs:
 
             cd /home/ec2-user/receipt-app
             docker pull ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
+
             docker stop receipt-app || true
             docker rm receipt-app || true
-            docker run -d --name receipt-app -p 8080:8080 \
+
+            docker run -d \
+              --name receipt-app \
+              -p 8080:8080 \
               --restart always \
               --env-file .env \
               ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
+
             docker image prune -f
