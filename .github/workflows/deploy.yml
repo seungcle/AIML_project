@@ -44,10 +44,27 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            cat <<EOF > /home/ec2-user/receipt-app/.env
+            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
+            DB_USERNAME_LOCAL=${{ secrets.DB_USERNAME_LOCAL }}
+            DB_PASSWORD_LOCAL=${{ secrets.DB_PASSWORD_LOCAL }}
+            SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+            SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+            SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+            RECEIPT_IMAGE_PATH=${{ secrets.RECEIPT_IMAGE_PATH }}
+            CLOVA_OCR_CLIENT_ID=${{ secrets.CLOVA_OCR_CLIENT_ID }}
+            CLOVA_OCR_CLIENT_SECRET=${{ secrets.CLOVA_OCR_CLIENT_SECRET }}
+            CLOVA_OCR_URL=${{ secrets.CLOVA_OCR_URL }}
+            EOF
+
+            cd /home/ec2-user/receipt-app
             docker pull ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
             docker stop receipt-app || true
             docker rm receipt-app || true
             docker run -d --name receipt-app -p 8080:8080 \
               --restart always \
+              --env-file .env \
               ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
             docker image prune -f
