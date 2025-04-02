@@ -44,6 +44,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            # 디렉토리 생성
+            mkdir -p /home/ec2-user/receipt-app
+
+            # .env 파일 생성
             cat <<EOF > /home/ec2-user/receipt-app/.env
             SPRING_JWT_SECRET_KEY=${{ secrets.SPRING_JWT_SECRET_KEY }}
             MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
@@ -59,12 +63,15 @@ jobs:
             CLOVA_OCR_URL=${{ secrets.CLOVA_OCR_URL }}
             EOF
 
+            # 디렉토리 이동 및 최신 이미지 pull
             cd /home/ec2-user/receipt-app
             docker pull ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
 
+            # 기존 컨테이너 중지 및 제거
             docker stop receipt-app || true
             docker rm receipt-app || true
 
+            # 새 컨테이너 실행
             docker run -d \
               --name receipt-app \
               -p 8080:8080 \
@@ -72,4 +79,5 @@ jobs:
               --env-file .env \
               ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
 
+            # 불필요한 이미지 정리
             docker image prune -f
