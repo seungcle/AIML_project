@@ -85,4 +85,16 @@ public class MemberService {
         member.deactivate(); // 회원 탈퇴 처리 (isActive = false)
         refreshTokenRepository.deleteByMemberId(member.getId());
     }
+
+    // 비번 검증
+    public boolean checkPassword(Member member, String rawPassword) {
+        return passwordEncoder.matches(rawPassword, member.getPassword());
+    }
+
+    // 비번 변경
+    public void updatePassword(Member member, String newPassword) {
+        String encoded = passwordEncoder.encode(newPassword);
+        member.setPassword(encoded);
+        memberRepository.save(member);
+    }
 }
