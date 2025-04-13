@@ -111,7 +111,7 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
 
   jwt:
-    secret-key: ${JWT_SECRET_KEY}
+    secret-key: ${SPRING_JWT_SECRET_KEY}
 
 receipt:
   image-path: ${RECEIPT_IMAGE_PATH}

@@ -3,6 +3,7 @@ package com.group.receiptapp.controller.member;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.dto.member.MemberResponse;
 import com.group.receiptapp.security.CustomUserDetails;
+import com.group.receiptapp.security.JwtUtil;
 import com.group.receiptapp.service.group.GroupService;
 import com.group.receiptapp.service.member.MemberService;
 import jakarta.validation.Valid;
@@ -20,9 +21,11 @@ import java.util.Map;
 public class MemberController {
 
     private final MemberService memberService;
+    private final JwtUtil jwtUtil;
 
-    public MemberController(MemberService memberService, GroupService groupService) {
+    public MemberController(MemberService memberService, GroupService groupService, JwtUtil jwtUtil) {
         this.memberService = memberService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/signup")
@@ -74,6 +77,53 @@ public class MemberController {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Map<String, String>> handleIllegalStateException(IllegalStateException e) {
         return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
+    }
+
+    // 비번 검증
+    @PostMapping("/verify-password")
+    public ResponseEntity<String> verifyPassword(@RequestBody Map<String, String> request,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getMember() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증되지 않은 사용자입니다.");
+        }
+
+        String inputPassword = request.get("password");
+        Member member = userDetails.getMember();
+
+        // 패스워드 비교
+        if (!memberService.checkPassword(member, inputPassword)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 틀렸습니다.");
+        }
+
+        return ResponseEntity.ok("비밀번호가 일치합니다.");
+    }
+
+    // 비번 변경
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(@RequestBody Map<String, String> request,
+                                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if (userDetails == null || userDetails.getMember() == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "인증되지 않은 사용자입니다."));
+        }
+
+        String newPassword = request.get("newPassword");
+        String confirmPassword = request.get("confirmPassword");
+
+        if (newPassword == null || confirmPassword == null || !newPassword.equals(confirmPassword)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "새 비밀번호가 일치하지 않습니다."));
+        }
+
+        Member member = userDetails.getMember();
+        memberService.updatePassword(member, newPassword);
+
+        String newToken = jwtUtil.generateToken(member.getEmail());
+
+        return ResponseEntity.ok(Map.of(
+                "new_access_token", newToken,
+                "message", "비밀번호가 변경되었습니다."
+        ));
     }
 
 }
