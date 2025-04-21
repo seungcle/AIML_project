@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../components/auth/Auth'; // useAuth 훅 사용
+import { useAuth } from '../../components/auth/Auth';
+import '../../styles/card.css';
+import '../../styles/button.css';
+import '../../styles/layout.css';
+import '../../styles/form.css';
 
-function Login() {
+function LoginPage() {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth(); // useAuth 훅에서 login 함수 가져옴
+  const { login } = useAuth();
 
   const handleLogin = async () => {
     if (id && password) {
       try {
-        setLoading(true); // 로딩 시작
+        setLoading(true);
         const response = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
           method: 'POST',
           headers: {
@@ -29,11 +33,7 @@ function Login() {
         if (response.ok) {
           const result = await response.json();
           setMessage('로그인 성공!');
-
-          // login 함수를 사용하여 토큰과 사용자 정보를 설정
           await login(result.access_token, result.refresh_token);
-
-          // 홈 화면으로 이동
           navigate('/');
         } else {
           setMessage('아이디 또는 패스워드가 잘못되었습니다.');
@@ -42,7 +42,7 @@ function Login() {
         console.error('로그인 중 서버 오류:', error);
         setMessage('서버 오류가 발생했습니다.');
       } finally {
-        setLoading(false); // 로딩 종료
+        setLoading(false);
       }
     } else {
       setMessage('아이디와 패스워드를 입력해주세요.');
@@ -50,26 +50,35 @@ function Login() {
   };
 
   return (
-    <main className="login-container">
-      <h2>로그인</h2>
-      <input
-        type="text"
-        placeholder="아이디"
-        value={id}
-        onChange={(e) => setId(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="패스워드"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin} disabled={loading}>
-        {loading ? '로그인 중...' : '로그인'}
-      </button>
-      <p>{message}</p>
+    <main className="page-container">
+      <div className="card" style={{ maxWidth: '400px', margin: '0 auto' }}>
+        <h2 style={{ marginBottom: '1rem' }}>로그인</h2>
+        <input
+          type="text"
+          placeholder="이메일"
+          value={id}
+          onChange={(e) => setId(e.target.value)}
+          className="form-input"
+        />
+        <input
+          type="password"
+          placeholder="비밀번호"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="form-input"
+        />
+        <button
+          className="btn"
+          onClick={handleLogin}
+          disabled={loading}
+          style={{ width: '100%', marginTop: '1rem' }}
+        >
+          {loading ? '로그인 중...' : '로그인'}
+        </button>
+        <p style={{ marginTop: '0.5rem', color: '#ef4444' }}>{message}</p>
+      </div>
     </main>
   );
 }
 
-export default Login;
+export default LoginPage;

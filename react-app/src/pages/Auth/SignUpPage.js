@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../../styles/card.css';
+import '../../styles/button.css';
+import '../../styles/layout.css';
+import '../../styles/form.css';
 
-function SignUp() {
+function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -10,17 +14,14 @@ function SignUp() {
   const handleSignup = async () => {
     if (email && password && name) {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/member/signup`, {  
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/member/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            email: email,
-            password: password,
-            name: name,
-          }),
+          body: JSON.stringify({ email, password, name }),
         });
+
         if (response.ok) {
           alert('회원가입이 완료되었습니다!');
           navigate('/');
@@ -36,43 +37,45 @@ function SignUp() {
   };
 
   return (
-    <main className="signup-container">
-      <h2 className="signup-title">회원가입</h2>
-      <form className="signup-form">
-        <div className="form-group">
-          <label htmlFor="email">이메일</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="이메일"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">패스워드</label>
-          <input
-            type="password"
-            id="password"
-            placeholder="패스워드"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="name">이름</label>
-          <input
-            type="text"
-            id="name"
-            placeholder="이름"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-        <button className="custom-button" type="button" onClick={handleSignup}>회원가입</button>
-      </form>
+    <main className="page-container">
+      <div className="card" style={{ maxWidth: '400px', margin: '0 auto' }}>
+        <h2 style={{ marginBottom: '1rem' }}>회원가입</h2>
+        <label htmlFor="email">이메일</label>
+        <input
+          className="form-input"
+          type="email"
+          id="email"
+          placeholder="이메일"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <label htmlFor="password">패스워드</label>
+        <input
+          className="form-input"
+          type="password"
+          id="password"
+          placeholder="패스워드"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <label htmlFor="name">이름</label>
+        <input
+          className="form-input"
+          type="text"
+          id="name"
+          placeholder="이름"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <button className="btn" type="button" onClick={handleSignup} style={{ width: '100%', marginTop: '1rem' }}>
+          회원가입
+        </button>
+      </div>
     </main>
   );
 }
 
-export default SignUp;
+export default SignUpPage;

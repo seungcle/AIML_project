@@ -1,15 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import { useAuth } from './Auth'; // useAuth 훅 사용
+import { useAuth } from './Auth'; 
+import '../../styles/button.css'; 
 
 function Logout() {
   const navigate = useNavigate();
-  const { setUserInfo } = useAuth(); // useAuth 훅에서 setUserInfo 함수 가져옴
+  const { setUserInfo } = useAuth();
 
   const handleLogout = async () => {
-    const refreshToken = Cookies.get('refresh_token'); // 쿠키에서 가져옴
-    
+    const refreshToken = Cookies.get('refresh_token');
+
     try {
       if (process.env.NODE_ENV === 'development') {
         console.log(`Requesting logout with URL: ${process.env.REACT_APP_API_URL}/logout`);
@@ -21,9 +22,7 @@ function Logout() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          refresh_token: refreshToken,
-        }),
+        body: JSON.stringify({ refresh_token: refreshToken }),
       });
 
       if (response.ok) {
@@ -36,16 +35,17 @@ function Logout() {
     } catch (error) {
       console.error('Server error during logout:', error);
     } finally {
-      // 로그아웃 처리
       Cookies.remove('access_token', { path: '/' });
       Cookies.remove('refresh_token', { path: '/' });
-      setUserInfo(null); // 전역 상태에서 사용자 정보 초기화
+      setUserInfo(null);
       navigate('/login');
     }
   };
 
   return (
-    <button onClick={handleLogout}>로그아웃</button>
+    <button className="btn" onClick={handleLogout}>
+      로그아웃
+    </button>
   );
 }
 

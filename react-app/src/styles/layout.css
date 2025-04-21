@@ -1,0 +1,19 @@
+.page-container {
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+@media screen and (max-width: 768px) {
+  .page-container {
+    padding: 1rem;
+  }
+}
+
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+

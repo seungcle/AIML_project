@@ -1,41 +1,90 @@
-// Navbar.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Logout from '../auth/Logout';
-import { useAuth } from '../auth/Auth'; // Context API 가져오기
+import { useAuth } from '../auth/Auth';
+import { Bell } from 'lucide-react';
+import { fetchNotifications, markNotificationAsRead } from '../../api/notifications';
+import '../../styles/button.css';
+import '../../styles/navbar.css';
 
 function Navbar() {
-  const { userInfo, loading } = useAuth(); // 로그인 상태 및 사용자 정보 가져오기
+  const { userInfo, loading } = useAuth();
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
 
-  // 로딩 중일 때 로딩 화면을 렌더링합니다.
-  if (loading) {
-    return (
-      <header className="navbar">
-        <div className="navbar-logo">
-          <Link to="/">이름짓기</Link>
-        </div>
-        <nav className="navbar-buttons">
-          <p>로딩 중...</p>
-        </nav>
-      </header>
-    );
-  }
+  const toggleDropdown = () => setShowDropdown((prev) => !prev);
+
+  useEffect(() => {
+    const load = async () => {
+      const data = await fetchNotifications(userInfo.id);
+      setNotifications(data);
+      setUnreadCount(data.filter((n) => !n.read).length);
+    };
+    if (userInfo) load();
+  }, [userInfo]);
+
+  const markAsRead = async (id) => {
+    const success = await markNotificationAsRead(id);
+    if (success) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(prev - 1, 0));
+    }
+  };
 
   return (
     <header className="navbar">
       <div className="navbar-logo">
-        <Link to="/">이름짓기</Link>
+        <Link to="/">홈페이지</Link>
       </div>
+
       <nav className="navbar-buttons">
-        {userInfo ? (
+        {loading ? (
+          <p>로딩 중...</p>
+        ) : userInfo ? (
           <>
-            <Link to={`/mypage/${userInfo.id}`} className="navbar-button">마이페이지</Link>
+            <div className="notification-wrapper">
+              <button onClick={toggleDropdown} className="notification-button">
+                <Bell size={20} color="#111827" />
+                {unreadCount > 0 && (
+                  <span className="notification-badge">
+                    {unreadCount > 20 ? '20+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {showDropdown && (
+                <div className="notification-dropdown">
+                  {notifications.length === 0 ? (
+                    <p className="no-notification">📭 새로운 알림이 없습니다.</p>
+                  ) : (
+                    notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className="notification-item"
+                        onClick={() => markAsRead(n.id)}
+                        style={{
+                          fontWeight: n.read ? 'normal' : 'bold',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {n.message}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            <Link to={`/mypage/${userInfo.id}`} className="btn">마이페이지</Link>
             <Logout />
           </>
         ) : (
           <>
-            <Link to="/signup" className="navbar-button">회원가입</Link>
-            <Link to="/login" className="navbar-button">로그인</Link>
+            <Link to="/signup" className="btn">회원가입</Link>
+            <Link to="/login" className="btn">로그인</Link>
           </>
         )}
       </nav>

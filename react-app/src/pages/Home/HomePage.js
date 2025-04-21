@@ -1,84 +1,114 @@
-// Home.js에서 상태 변경에 따른 업데이트 반영
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../components/auth/Auth'; // 로그인 상태 확인을 위한 useAuth 훅
+import { useAuth } from '../../components/auth/Auth';
+import '../../styles/card.css';
+import '../../styles/button.css';
+import '../../styles/layout.css';
 
 function Home() {
-  const { userInfo, isLoggedIn, loading } = useAuth(); // 로그인 상태 및 사용자 정보 확인
+  const { userInfo, isLoggedIn, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 홈 화면에 접근할 때 userInfo가 변경되면 자동 리렌더링
     console.log('Home page updated:', { userInfo, isLoggedIn });
   }, [userInfo, isLoggedIn]);
 
-  // 로딩 중인 경우
-  if (loading) {
-    return <p>로딩 중...</p>;
-  }
+  if (loading) return <p>로딩 중...</p>;
 
-  // 버튼 클릭 핸들러
-  const handleCreateGroup = () => {
-    navigate('/create-group'); // 그룹 만들기 페이지로 이동
+  const handleCreateGroup = () => navigate('/create-group');
+  const handleJoinGroup = () => navigate('/join-group');
+  const handleReceiptUpload = () => navigate('/receipt-upload');
+  const handleGroupManagement = () => navigate('/group-management');
+  const handleViewReceipts = () => navigate('/receipts');
+
+  const cardStyle = {
+    lineHeight: '1.7',
+    flex: '1 1 300px',
   };
 
-  const handleJoinGroup = () => {
-    navigate('/join-group'); // 그룹 가입 페이지로 이동
-  };
-
-  const handleReceiptUpload = () => {
-    navigate('/receipt-upload'); // 영수증 업로드 페이지로 이동
-  };
-
-  const handleGroupManagement = () => {
-    navigate('/group-management'); // 그룹 관리 페이지로 이동
-  };
-
-  const handleViewReceipts = () => {
-    navigate('/receipts'); // 영수증 조회 페이지로 이동
+  const buttonStyle = {
+    width: 'fit-content',
+    alignSelf: 'start',
   };
 
   return (
-    <div>
-      <main className="home-container">
-        {!isLoggedIn || !userInfo ? ( // 로그인이 안 되어 있을 때
-          <>
-            <section id="intro" className="home-section">
-              <h2>소개</h2>
-              <p>~은 기업 비용 관리를 위한 통합 솔루션입니다...</p>
-            </section>
-            <section id="features" className="home-section">
-              <h2>주요 기능</h2>
-              <p>~은 지출 관리, 법인카드 관리 등 여러 기능을 제공합니다...</p>
-            </section>
-          </>
-        ) : userInfo.admin ? ( // 관리자 회원일 때
-          <section id="actions" className="home-section">
-            <h2>관리자 관리</h2>
-            <div className="button-container">
-              <button onClick={handleGroupManagement}>그룹 관리하기</button>
-              <button onClick={handleReceiptUpload}>영수증 업로드</button>
-              <button onClick={handleViewReceipts}>영수증 조회</button>
-            </div>
-          </section>
-        ) : userInfo.groupId ? ( // 그룹에 가입된 일반 회원일 때
-          <section id="actions" className="home-section">
-            <h2>그룹 관리</h2>
-            <div className="button-container">
-              <button onClick={handleReceiptUpload}>영수증 업로드</button>
-              <button onClick={handleViewReceipts}>영수증 조회</button>
-            </div>
-          </section>
-        ) : ( // 그룹에 가입되지 않은 일반 회원일 때
-          <section id="actions" className="home-section">
-            <h2>그룹 관리</h2>
-            <div className="button-container">
-              <button onClick={handleCreateGroup}>그룹 만들기</button>
-              <button onClick={handleJoinGroup}>그룹 가입하기</button>
-            </div>
-          </section>
+    <div className="page-container" style={{ paddingBottom: '3rem' }}>
+      {/* 🎯 히어로 섹션 */}
+      <section className="hero" style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>홍익 Receipt</h1>
+        <p style={{ color: '#6b7280' }}>지출 관리를 쉽게, 팀과 함께.</p>
+        {!isLoggedIn && (
+          <button className="btn btn-sm" style={{ marginTop: '1.5rem' }} onClick={handleJoinGroup}>
+            시작하기
+          </button>
         )}
-      </main>
+      </section>
+
+      {/* 🔶 카드 섹션 */}
+      {!isLoggedIn || !userInfo ? (
+        <section className="card-grid">
+          <div className="card" style={cardStyle}>
+            <h2>자동 분류</h2>
+            <p>OCR 인식 후 AI가 자동으로 카테고리를 분류해줘요.</p>
+          </div>
+          <div className="card" style={cardStyle}>
+            <h2>통계 리포트</h2>
+            <p>월간/연간 리포트를 CSV, PDF로 추출할 수 있어요.</p>
+          </div>
+          <div className="card" style={cardStyle}>
+            <h2>그룹 관리</h2>
+            <p>관리자는 초대/수락 기능으로 팀원들을 관리할 수 있어요.</p>
+          </div>
+        </section>
+      ) : userInfo.admin ? (
+        <div className="card" style={{ maxWidth: '450px', margin: '0 auto' }}>
+          <h2 style={{ marginBottom: '1rem' }}>관리자 관리</h2>
+          <div
+            className="button-container"
+            style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+          >
+            <button className="btn btn-sm" style={buttonStyle} onClick={handleGroupManagement}>
+              그룹 관리하기
+            </button>
+            <button className="btn btn-sm" style={buttonStyle} onClick={handleReceiptUpload}>
+              영수증 업로드
+            </button>
+            <button className="btn btn-sm" style={buttonStyle} onClick={handleViewReceipts}>
+              영수증 조회
+            </button>
+          </div>
+        </div>
+      ) : userInfo.groupId ? (
+        <div className="card" style={{ maxWidth: '450px', margin: '0 auto' }}>
+          <h2 style={{ marginBottom: '1rem' }}>그룹 관리</h2>
+          <div
+            className="button-container"
+            style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+          >
+            <button className="btn btn-sm" style={buttonStyle} onClick={handleReceiptUpload}>
+              영수증 업로드
+            </button>
+            <button className="btn btn-sm" style={buttonStyle} onClick={handleViewReceipts}>
+              영수증 조회
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="card" style={{ maxWidth: '450px', margin: '0 auto' }}>
+          <h2 style={{ marginBottom: '1rem' }}>그룹 관리</h2>
+          <div
+            className="button-container"
+            style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+          >
+            <button className="btn btn-sm" style={buttonStyle} onClick={handleCreateGroup}>
+              그룹 만들기
+            </button>
+            <button className="btn btn-sm" style={buttonStyle} onClick={handleJoinGroup}>
+              그룹 가입하기
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
