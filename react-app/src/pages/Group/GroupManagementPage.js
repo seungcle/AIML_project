@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import GroupJoinRequests from '../components/groupJoinRequests';
+import GroupJoinRequests from '../Group/JoinGroupPage';
 //import { useNavigate } from 'react-router-dom';
 
 function GroupManagement() {

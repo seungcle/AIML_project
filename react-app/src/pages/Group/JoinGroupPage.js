@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { getAccessToken, refreshAccessToken } from '../components/auth';
-import GetGroup from '../components/getGroup';
+import { getAccessToken, refreshAccessToken } from '../../components/auth/Auth';
+import GetGroup from '../../components/group/GetGroup';
 
 function JoinGroup() {
   const [selectedGroupId, setSelectedGroupId] = useState(null);

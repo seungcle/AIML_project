@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAccessToken, refreshAccessToken } from './auth';
+import { getAccessToken, refreshAccessToken } from '../auth/Auth';
 
 function GetGroup({ onSelectGroup }) {
   const [groups, setGroups] = useState([]); // 그룹 목록 상태

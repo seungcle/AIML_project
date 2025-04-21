@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../components/auth'; // useAuth 훅 사용
-import '../styles/login.css';
+import { useAuth } from '../../components/auth/Auth'; // useAuth 훅 사용
 
 function Login() {
   const [id, setId] = useState('');

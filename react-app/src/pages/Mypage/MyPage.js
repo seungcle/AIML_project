@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '../components/auth';
+import { useAuth } from '../../components/auth/Auth';
 
 const MyPage = () => {
   const { userInfo, loading } = useAuth();

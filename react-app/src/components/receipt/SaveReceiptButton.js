@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAccessToken } from '../components/auth';
+import { getAccessToken } from '../../components/auth/Auth';
 
 function SaveReceiptButton({ ocrResult }) {
   const handleSaveReceipt = async () => {

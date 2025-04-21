@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import { useAuth } from './auth'; // useAuth 훅 사용
+import { useAuth } from './Auth'; // useAuth 훅 사용
 
 function Logout() {
   const navigate = useNavigate();

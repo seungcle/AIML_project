@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import '../styles/signUp.css';  // CSS 파일 가져오기
 import { useNavigate } from 'react-router-dom';
 
 function SignUp() {

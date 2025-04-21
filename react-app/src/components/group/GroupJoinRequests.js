@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth, getAccessToken } from '../components/auth';
+import { useAuth, getAccessToken } from '../components/auth/Auth';
 
 function GroupJoinRequests() {
   const { userInfo, refreshAccessToken } = useAuth();

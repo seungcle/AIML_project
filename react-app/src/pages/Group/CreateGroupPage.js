@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, getAccessToken, refreshAccessToken } from '../components/auth';
+import { useAuth, getAccessToken, refreshAccessToken } from '../../components/auth/Auth';
 
 function CreateGroup() {
   const [groupName, setGroupName] = useState('');

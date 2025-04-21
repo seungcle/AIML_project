@@ -1,8 +1,7 @@
 // Home.js에서 상태 변경에 따른 업데이트 반영
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/home.css';
-import { useAuth } from '../components/auth'; // 로그인 상태 확인을 위한 useAuth 훅
+import { useAuth } from '../../components/auth/Auth'; // 로그인 상태 확인을 위한 useAuth 훅
 
 function Home() {
   const { userInfo, isLoggedIn, loading } = useAuth(); // 로그인 상태 및 사용자 정보 확인

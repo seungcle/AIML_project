@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
-import getMemberInfo from './getMember'; // 사용자 정보를 가져오는 함수
+import getMemberInfo from '../../utils/GetMember'; // 사용자 정보를 가져오는 함수
 
 const AuthContext = createContext();
 

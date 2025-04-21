@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { getAccessToken } from '../components/auth'; // AuthProvider에서 가져옴
-import SaveReceiptButton from '../components/saveReceiptButton';
+import { getAccessToken } from '../../components/auth/Auth'; // AuthProvider에서 가져옴
+import SaveReceiptButton from '../../components/receipt/SaveReceiptButton';
 
 function ReceiptUpload() {
   const [file, setFile] = useState(null);

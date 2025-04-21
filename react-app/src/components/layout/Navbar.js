@@ -1,9 +1,8 @@
 // Navbar.js
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/navbar.css';
-import Logout from './logout';
-import { useAuth } from './auth'; // Context API 가져오기
+import Logout from '../auth/Logout';
+import { useAuth } from '../auth/Auth'; // Context API 가져오기
 
 function Navbar() {
   const { userInfo, loading } = useAuth(); // 로그인 상태 및 사용자 정보 가져오기

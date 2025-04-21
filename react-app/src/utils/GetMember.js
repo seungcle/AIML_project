@@ -1,4 +1,4 @@
-import { getAccessToken, refreshAccessToken } from './auth';
+import { getAccessToken, refreshAccessToken } from '../components/auth/Auth';
 
 const getMemberInfo = async () => {
   try {

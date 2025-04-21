@@ -1,7 +1,7 @@
 // ReceiptList.js
 import React, { useEffect, useState } from 'react';
-import { getAccessToken, refreshAccessToken } from '../components/auth'; // 토큰 관리 함수들
-import { useAuth } from '../components/auth'; // 사용자 정보와 로그인 상태를 확인하기 위한 useAuth 훅
+import { getAccessToken, refreshAccessToken } from '../../components/auth/Auth'; // 토큰 관리 함수들
+import { useAuth } from '../../components/auth/Auth'; // 사용자 정보와 로그인 상태를 확인하기 위한 useAuth 훅
 
 function ReceiptList() {
   const { isLoggedIn, loading } = useAuth();

@@ -1,17 +1,17 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Home from './pages/home';
-import SignupPage from './pages/signUp';
-import LoginPage from './pages/login';
-import MyPage from './pages/mypage';
-import Navbar from './components/navbar';
-import CreateGroup from './pages/createGroup';
-import JoinGroup from './pages/joinGroup';
-import ReceiptUpload from './pages/receiptUpload';
-import GroupManagement from './pages/groupManagement';
-import { AuthProvider, useAuth } from './components/auth';
-import ProtectedRoute from './components/protectedRoute';
-import ReceiptList from './pages/receiptList';
+import Home from './pages/Home/HomePage';
+import SignupPage from './pages/Auth/SignUpPage';
+import LoginPage from './pages/Auth/LoginPage';
+import MyPage from './pages/Mypage/MyPage';
+import Navbar from './components/layout/Navbar';
+import CreateGroup from './pages/Group/CreateGroupPage';
+import JoinGroup from './pages/Group/JoinGroupPage';
+import ReceiptUpload from './pages/Receipt/ReceiptUploadPage';
+import GroupManagement from './pages/Group/GroupManagementPage';
+import { AuthProvider, useAuth } from './components/auth/Auth';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import ReceiptList from './pages/Receipt/ReceiptListPage';
 
 
 function AppRoutes() {
