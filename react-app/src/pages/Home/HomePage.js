@@ -37,11 +37,6 @@ function Home() {
       <section className="hero" style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>홍익 Receipt</h1>
         <p style={{ color: '#6b7280' }}>지출 관리를 쉽게, 팀과 함께.</p>
-        {!isLoggedIn && (
-          <button className="btn btn-sm" style={{ marginTop: '1.5rem' }} onClick={handleJoinGroup}>
-            시작하기
-          </button>
-        )}
       </section>
 
       {/* 🔶 카드 섹션 */}
