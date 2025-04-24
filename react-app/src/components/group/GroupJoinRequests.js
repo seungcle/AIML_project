@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth, getAccessToken } from '../components/auth/Auth';
+import { useAuth, getAccessToken } from '../auth/Auth';
+import '../../styles/group.css';
 
 function GroupJoinRequests() {
   const { userInfo, refreshAccessToken } = useAuth();
@@ -21,16 +22,13 @@ function GroupJoinRequests() {
         if (!token) {
           const refreshed = await refreshAccessToken();
           if (refreshed) {
-            token = getAccessToken(); // 갱신된 토큰을 다시 가져옴
+            token = getAccessToken();
           } else {
             setError('토큰 갱신에 실패했습니다. 다시 로그인해주세요.');
             setLoading(false);
             return;
           }
         }
-
-        // 콘솔 로그 추가 - 실제로 전송하는 토큰 확인
-        console.log('Authorization Header:', `Bearer ${token}`);
 
         const response = await fetch(`${process.env.REACT_APP_API_URL}/group/requests/${userInfo.groupId}`, {
           method: 'GET',
@@ -48,12 +46,7 @@ function GroupJoinRequests() {
           setError(errorData.message || '가입 신청 목록을 불러오는 데 실패했습니다.');
         }
       } catch (err) {
-        console.error('오류 발생:', err);
-        if (err.response && err.response.status === 403) {
-          setError('접근 권한이 없습니다. 관리자 권한이 필요합니다.');
-        } else {
-          setError('서버 오류가 발생했습니다.');
-        }
+        setError('서버 오류가 발생했습니다.');
       } finally {
         setLoading(false);
       }
@@ -62,7 +55,7 @@ function GroupJoinRequests() {
     fetchJoinRequests();
   }, [userInfo, refreshAccessToken]);
 
-  const handleApprove = async (joinRequestId) => {
+  const handleApprove = async (id) => {
     try {
       let token = getAccessToken();
       if (!token) {
@@ -70,12 +63,12 @@ function GroupJoinRequests() {
         if (refreshed) {
           token = getAccessToken();
         } else {
-          setError('토큰 갱신에 실패했습니다. 다시 로그인해주세요.');
+          setError('토큰 갱신 실패. 다시 로그인해주세요.');
           return;
         }
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/group/requests/approve/${joinRequestId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/group/requests/approve/${id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -84,18 +77,17 @@ function GroupJoinRequests() {
       });
 
       if (response.ok) {
-        setJoinRequests(joinRequests.filter(request => request.id !== joinRequestId));
+        setJoinRequests(prev => prev.filter(r => r.id !== id));
         setSuccessMessage('가입 요청이 승인되었습니다.');
       } else {
-        setError('가입 요청 승인에 실패했습니다.');
+        setError('승인 실패');
       }
-    } catch (err) {
-      console.error('오류 발생:', err);
-      setError('서버 오류가 발생했습니다.');
+    } catch {
+      setError('서버 오류');
     }
   };
 
-  const handleReject = async (joinRequestId) => {
+  const handleReject = async (id) => {
     try {
       let token = getAccessToken();
       if (!token) {
@@ -103,12 +95,12 @@ function GroupJoinRequests() {
         if (refreshed) {
           token = getAccessToken();
         } else {
-          setError('토큰 갱신에 실패했습니다. 다시 로그인해주세요.');
+          setError('토큰 갱신 실패. 다시 로그인해주세요.');
           return;
         }
       }
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/group/requests/reject/${joinRequestId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/group/requests/reject/${id}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -117,59 +109,53 @@ function GroupJoinRequests() {
       });
 
       if (response.ok) {
-        setJoinRequests(joinRequests.filter(request => request.id !== joinRequestId));
+        setJoinRequests(prev => prev.filter(r => r.id !== id));
         setSuccessMessage('가입 요청이 거절되었습니다.');
       } else {
-        setError('가입 요청 거절에 실패했습니다.');
+        setError('거절 실패');
       }
-    } catch (err) {
-      console.error('오류 발생:', err);
-      setError('서버 오류가 발생했습니다.');
+    } catch {
+      setError('서버 오류');
     }
   };
 
-  if (loading) {
-    return <p>로딩 중...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
+  if (loading) return <p>로딩 중...</p>;
+  if (error) return <p className="group-message">{error}</p>;
 
   return (
-    <div>
-      <h2>가입 신청 목록</h2>
+    <div className="join-requests-wrapper">
+      <h2 className="group-title">가입 신청 목록</h2>
       {successMessage && <p className="success-message">{successMessage}</p>}
       {joinRequests.length > 0 ? (
-        <table>
+        <table className="join-requests-table">
           <thead>
             <tr>
-              <th>신청 ID</th>
-              <th>회원 이름</th>
-              <th>회원 이메일</th>
-              <th>그룹 이름</th>
+              <th>ID</th>
+              <th>이름</th>
+              <th>이메일</th>
+              <th>그룹</th>
               <th>상태</th>
               <th>작업</th>
             </tr>
           </thead>
           <tbody>
-            {joinRequests.map((request) => (
-              <tr key={request.id}>
-                <td>{request.id}</td>
-                <td>{request.memberName}</td>
-                <td>{request.memberEmail}</td>
-                <td>{request.groupName}</td>
-                <td>{request.status}</td>
+            {joinRequests.map((r) => (
+              <tr key={r.id}>
+                <td>{r.id}</td>
+                <td>{r.memberName}</td>
+                <td>{r.memberEmail}</td>
+                <td>{r.groupName}</td>
+                <td>{r.status}</td>
                 <td>
-                  <button onClick={() => handleApprove(request.id)}>승인하기</button>
-                  <button onClick={() => handleReject(request.id)}>거절하기</button>
+                  <button className="btn-approve" onClick={() => handleApprove(r.id)}>승인</button>
+                  <button className="btn-reject" onClick={() => handleReject(r.id)}>거절</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       ) : (
-        <p>현재 가입 신청이 없습니다.</p>
+        <p className="group-message">현재 가입 요청이 없습니다.</p>
       )}
     </div>
   );

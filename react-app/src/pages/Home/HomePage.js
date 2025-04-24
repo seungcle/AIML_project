@@ -33,13 +33,11 @@ function Home() {
 
   return (
     <div className="page-container" style={{ paddingBottom: '3rem' }}>
-      {/* 🎯 히어로 섹션 */}
       <section className="hero" style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>홍익 Receipt</h1>
         <p style={{ color: '#6b7280' }}>지출 관리를 쉽게, 팀과 함께.</p>
       </section>
 
-      {/* 🔶 카드 섹션 */}
       {!isLoggedIn || !userInfo ? (
         <section className="card-grid">
           <div className="card" style={cardStyle}>
