@@ -21,6 +21,7 @@ public class ReceiptResponse {
     private Long receiptId;            // 영수증 ID 추가
     private BigDecimal amount;          // 금액
     private Long categoryId;            // 카테고리 ID
+    private String categoryName;
     private LocalDate date;             // 날짜
     private LocalDateTime deletedAt;   // 삭제 시각
     private Boolean isDeleted;         // 삭제 여부
@@ -37,6 +38,7 @@ public class ReceiptResponse {
         this.receiptId = receipt.getId();
         this.amount = receipt.getAmount();
         this.categoryId = receipt.getCategory().getId();
+        this.categoryName = receipt.getCategory() != null ? receipt.getCategory().getName() : null;
         this.date = receipt.getDate();
         this.deletedAt = receipt.getDeletedAt();
         this.isDeleted = receipt.getIsDeleted();
