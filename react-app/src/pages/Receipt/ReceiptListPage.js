@@ -1,7 +1,7 @@
-// ReceiptList.js
 import React, { useEffect, useState } from 'react';
-import { getAccessToken, refreshAccessToken } from '../../components/auth/Auth'; // 토큰 관리 함수들
-import { useAuth } from '../../components/auth/Auth'; // 사용자 정보와 로그인 상태를 확인하기 위한 useAuth 훅
+import { getAccessToken, refreshAccessToken } from '../../components/auth/Auth';
+import { useAuth } from '../../components/auth/Auth';
+import '../../styles/card.css'; // 기존 카드 스타일 불러오기
 
 function ReceiptList() {
   const { isLoggedIn, loading } = useAuth();
@@ -14,7 +14,6 @@ function ReceiptList() {
       try {
         let token = getAccessToken();
 
-        // 토큰이 없거나 만료된 경우 갱신 시도
         if (!token) {
           const refreshed = await refreshAccessToken();
           if (refreshed) {
@@ -26,7 +25,6 @@ function ReceiptList() {
           }
         }
 
-        // API 요청
         const response = await fetch(`${process.env.REACT_APP_API_URL}/receipts/my`, {
           method: 'GET',
           headers: {
@@ -52,7 +50,6 @@ function ReceiptList() {
       }
     };
 
-    // 사용자가 로그인 되어 있을 때만 영수증 목록을 가져옵니다.
     if (isLoggedIn) {
       fetchReceipts();
     } else {
@@ -70,29 +67,27 @@ function ReceiptList() {
   }
 
   return (
-    <div>
-      <h2>영수증 목록</h2>
+    <div style={{ padding: '2rem' }}>
+      <h2 style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>
+        영수증 목록
+      </h2>
       {receipts.length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>날짜</th>
-              <th>가게 이름</th>
-              <th>금액</th>
-              <th>주소</th>
-            </tr>
-          </thead>
-          <tbody>
-            {receipts.map((receipt) => (
-              <tr key={receipt.id}>
-                <td>{receipt.date}</td>
-                <td>{receipt.storeName}</td>
-                <td>{receipt.amount}</td>
-                <td>{receipt.storeAddress}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {receipts.map((receipt) => (
+            <div key={receipt.id} className="card" style={{ padding: '1.2rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.95rem', color: '#666' }}>{receipt.date}</span>
+                <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>{receipt.amount.toLocaleString()}원</span>
+              </div>
+              <div style={{ fontSize: '1.1rem', fontWeight: '500', marginBottom: '0.5rem' }}>
+                {receipt.storeName}
+              </div>
+              <div style={{ fontSize: '0.9rem', color: '#888' }}>
+                {receipt.storeAddress}
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
         <p>현재 등록된 영수증이 없습니다.</p>
       )}
