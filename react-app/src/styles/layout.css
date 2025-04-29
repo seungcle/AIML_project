@@ -17,3 +17,20 @@
   gap: 1.5rem;
 }
 
+/* 모바일 화면 대응 */
+@media (max-width: 600px) {
+  .card {
+    padding: 1.5rem;
+  }
+
+  .card h2,
+  .card h3 {
+    font-size: 1.3rem;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+  }
+}

@@ -3,7 +3,7 @@ import { getAccessToken, refreshAccessToken } from '../../components/auth/Auth';
 import { useAuth } from '../../components/auth/Auth';
 import '../../styles/card.css'; // 기존 카드 스타일 불러오기
 
-function ReceiptList() {
+function ReceiptMyList() {
   const { isLoggedIn, loading } = useAuth();
   const [receipts, setReceipts] = useState([]);
   const [error, setError] = useState('');
@@ -95,4 +95,4 @@ function ReceiptList() {
   );
 }
 
-export default ReceiptList;
+export default ReceiptMyList;

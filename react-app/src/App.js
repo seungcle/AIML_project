@@ -11,8 +11,8 @@ import ReceiptUpload from './pages/Receipt/ReceiptUploadPage';
 import GroupManagement from './pages/Group/GroupManagementPage';
 import { AuthProvider, useAuth } from './components/auth/Auth';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import ReceiptList from './pages/Receipt/ReceiptListPage';
-
+import ReceiptMyList from './pages/Receipt/ReceiptListMyPage';
+import GroupMemberReceiptList from './pages/Receipt/GroupMemberReceiptList';
 
 function AppRoutes() {
   const { userInfo, loading } = useAuth();
@@ -40,7 +40,8 @@ function AppRoutes() {
         <Route path="/mypage/:userId" element={<ProtectedRoute requiredAdmin={true}><MyPage /></ProtectedRoute>} />
         <Route path="/receipt-upload" element={<ProtectedRoute requiredAdmin={true}><ReceiptUpload /></ProtectedRoute>} />
         <Route path="/group-management" element={<ProtectedRoute requiredAdmin={true}><GroupManagement /></ProtectedRoute>} />
-        <Route path="/receipts" element={<ProtectedRoute requiredAdmin={true}><ReceiptList /></ProtectedRoute>} />
+        <Route path="/my-receipts" element={<ProtectedRoute requiredAdmin={true}><ReceiptMyList /></ProtectedRoute>} />
+        <Route path="/group-member-receipts/:memberId/:year/:month" element={<ProtectedRoute requiredAdmin={true}><GroupMemberReceiptList /></ProtectedRoute>} /> 
       </Routes>
     );
   }
@@ -53,7 +54,8 @@ function AppRoutes() {
         <Route path="/mypage/:userId" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
         <Route path="/receipt-upload" element={<ProtectedRoute><ReceiptUpload /></ProtectedRoute>} />
         <Route path="/receipt-history" element={<ProtectedRoute><ReceiptUpload /></ProtectedRoute>} />
-        <Route path="/receipts" element={<ProtectedRoute><ReceiptList /></ProtectedRoute>} />
+        <Route path="/my-receipts" element={<ProtectedRoute><ReceiptMyList /></ProtectedRoute>} />
+        <Route path="/group-member-receipts/:memberId/:year/:month" element={<ProtectedRoute requiredAdmin={true}><GroupMemberReceiptList /></ProtectedRoute>} />
       </Routes>
     );
   }

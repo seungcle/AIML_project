@@ -13,6 +13,7 @@ function Home() {
 
   useEffect(() => {
     console.log('Home page updated:', { userInfo, isLoggedIn });
+    console.log('userInfo 내용:', userInfo); // ⭐ 여기 추가
   }, [userInfo, isLoggedIn]);
 
   if (loading) return <p>로딩 중...</p>;
@@ -21,8 +22,18 @@ function Home() {
   const handleJoinGroup = () => navigate('/join-group');
   const handleReceiptUpload = () => navigate('/receipt-upload');
   const handleGroupManagement = () => navigate('/group-management');
-  const handleViewReceipts = () => navigate('/receipts');
   const handleGoLogin = () => setShowAuthOptions(true);
+
+  const handleViewGroupReceipts = () => {
+    if (!userInfo || !userInfo.id) {
+      alert('회원 정보가 아직 로딩되지 않았습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+    const currentYear = new Date().getFullYear();
+    const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+    navigate(`/group-member-receipts/${userInfo.id}/${currentYear}/${currentMonth}`);
+  };
+
 
   const cardStyle = {
     lineHeight: '1.7',
@@ -75,7 +86,7 @@ function Home() {
               <button className="btn btn-sm" style={buttonStyle} onClick={handleGroupManagement}>
                 그룹 관리하기
               </button>
-              <button className="btn btn-sm" style={buttonStyle} onClick={handleViewReceipts}>
+              <button className="btn btn-sm" style={buttonStyle} onClick={handleViewGroupReceipts}>
                 그룹 영수증 조회하기
               </button>
             </div>
@@ -94,7 +105,18 @@ function Home() {
         </>
       ) : userInfo.groupId ? (
         <>
-          {/* 📸 일반 유저 카드 */}
+          {/* 📸 그룹 가입된 일반 유저 카드 */}
+          <div className="card" style={{ maxWidth: '450px', margin: '0 auto', marginBottom: '2rem' }}>
+            <h2 style={{ marginBottom: '1rem' }}>그룹 영수증 조회</h2>
+            <p style={{ color: '#6b7280', marginBottom: '1.2rem' }}>
+              소속된 그룹의 지출 내역을 확인해보세요.
+            </p>
+            <button className="btn btn-sm" style={{ ...buttonStyle, marginBottom: '1rem' }} onClick={handleViewGroupReceipts}>
+              그룹 영수증 조회하기
+            </button>
+          </div>
+
+          {/* 📸 영수증 업로드 카드 */}
           <div className="card" style={{ maxWidth: '450px', margin: '0 auto' }}>
             <h2 style={{ marginBottom: '1rem' }}>지출 내역 등록</h2>
             <p style={{ color: '#6b7280' }}>
