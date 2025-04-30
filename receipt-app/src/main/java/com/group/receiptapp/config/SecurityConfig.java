@@ -63,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/logout", "/images/**").authenticated()
                         .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll()
                         .requestMatchers("/member/current").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/member/delete-account").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
