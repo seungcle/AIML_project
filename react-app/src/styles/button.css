@@ -63,3 +63,20 @@ button.btn-sm {
   background-color: #2563eb;
   transform: translateY(-2px);
 }
+
+/* 연회색 → 연빨강 강조 버튼 (회원 탈퇴 전용) */
+a.btn-danger-light,
+button.btn-danger-light {
+  background-color: #f3f4f6;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+a.btn-danger-light:hover,
+button.btn-danger-light:hover {
+  background-color: #fecaca;
+  color: #b91c1c;
+  border-color: #b91c1c;
+}

@@ -3,7 +3,7 @@ import { useAuth } from '../../components/auth/Auth';
 import { useNavigate } from 'react-router-dom';
 import '../../styles/card.css';
 import '../../styles/layout.css';
-import '../../styles/button.css'; // 버튼 스타일 가져오기
+import '../../styles/button.css';
 
 const MyPage = () => {
   const { userInfo, loading } = useAuth();
@@ -11,6 +11,14 @@ const MyPage = () => {
 
   const handleViewMyReceipts = () => {
     navigate('/my-receipts');
+  };
+
+  const handleChangePassword = () => {
+    navigate('/auth/password-verify');
+  };
+
+  const handleDeleteAccount = () => {
+    navigate('/auth/delete-account');
   };
 
   if (loading) {
@@ -50,6 +58,7 @@ const MyPage = () => {
         style={{
           maxWidth: '500px',
           margin: '0 auto',
+          marginBottom: '2rem',
           padding: '2rem',
           borderRadius: '1rem',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
@@ -68,6 +77,33 @@ const MyPage = () => {
           <span role="img" aria-label="receipt">🧾</span>
           영수증 보기
         </button>
+      </div>
+
+      {/* 회원 정보 수정 카드 */}
+      <div
+        className="card"
+        style={{
+          maxWidth: '500px',
+          margin: '0 auto',
+          padding: '2rem',
+          borderRadius: '1rem',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          textAlign: 'center',
+        }}
+      >
+        <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem', color: '#222' }}>회원 정보 관리</h3>
+        <p style={{ marginBottom: '1.5rem', fontSize: '1rem', color: '#666' }}>
+          비밀번호를 변경하거나 탈퇴할 수 있습니다.
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+          <button className="btn" onClick={handleChangePassword}>
+            비밀번호 변경
+          </button>
+
+          <button className="btn btn-danger-light" onClick={handleDeleteAccount}>
+            회원 탈퇴
+          </button>
+        </div>
       </div>
     </div>
   );
