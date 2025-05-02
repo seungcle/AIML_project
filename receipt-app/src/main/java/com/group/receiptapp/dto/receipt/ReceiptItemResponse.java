@@ -18,6 +18,13 @@ public class ReceiptItemResponse {
         this.totalPrice = totalPrice;
     }
 
+    public ReceiptItemResponse(ReceiptItemRequest request) {
+        this.itemName = request.getItemName();
+        this.quantity = request.getQuantity();
+        this.unitPrice = request.getUnitPrice();
+        this.totalPrice = request.getTotalPrice();
+    }
+
     public String getItemName() {
         return itemName;
     }

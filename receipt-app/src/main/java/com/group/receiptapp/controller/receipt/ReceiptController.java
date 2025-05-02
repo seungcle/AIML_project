@@ -1,10 +1,13 @@
 package com.group.receiptapp.controller.receipt;
 import com.group.receiptapp.domain.member.Member;
+import com.group.receiptapp.dto.ocr.OcrResponse;
 import com.group.receiptapp.dto.receipt.ReceiptResponse;
+import com.group.receiptapp.dto.receipt.ReceiptSaveRequest;
 import com.group.receiptapp.security.JwtUtil;
 import com.group.receiptapp.service.login.CustomUserDetailsService;
 import com.group.receiptapp.service.ocr.OcrService;
 import com.group.receiptapp.service.receipt.ReceiptService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +33,7 @@ public class ReceiptController {
         this.receiptService = receiptService;
     }
 
+    /*
     @PostMapping("/process")
     public ResponseEntity<ReceiptResponse> processAll(@RequestParam("file") MultipartFile file,
                                                       @RequestHeader("Authorization") String authorizationHeader) {
@@ -42,6 +46,43 @@ public class ReceiptController {
             return ResponseEntity.status(401).body(new ReceiptResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ReceiptResponse("Error processing receipt: " + e.getMessage()));
+        }
+    }
+    */
+
+    @PostMapping("/preview")
+    public ResponseEntity<ReceiptResponse> previewReceipt(
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        try {
+            ReceiptResponse response = ocrService.previewReceiptWithAuth(file, authorizationHeader);
+            return ResponseEntity.ok(response);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ReceiptResponse("Unauthorized: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ReceiptResponse("OCR error: " + e.getMessage()));
+        }
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity<ReceiptResponse> saveReceipt(@RequestBody ReceiptSaveRequest request,
+                                                       @RequestHeader("Authorization") String authorization) {
+        try {
+            String token = authorization.substring(7);  // Bearer 제거
+            String username = jwtUtil.extractUsername(token);
+            Member member = customUserDetailsService.loadUserByUsernameAsMember(username);
+
+            // 사용자 ID 설정
+            request.setMemberId(member.getId());
+
+            // 저장 처리
+            ReceiptResponse receiptResponse = receiptService.saveReceipt(request);
+            return ResponseEntity.ok(receiptResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(new ReceiptResponse("Error saving receipt: " + e.getMessage()));
         }
     }
 

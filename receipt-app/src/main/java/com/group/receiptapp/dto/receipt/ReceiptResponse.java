@@ -58,6 +58,21 @@ public class ReceiptResponse {
         this.notificationResults = notificationResults;
     }
 
+    public ReceiptResponse(ReceiptSaveRequest request, String categoryName) {
+        this.storeName = request.getStoreName();
+        this.storeAddress = request.getStoreAddress();
+        this.date = request.getDate();
+        this.amount = request.getAmount();
+        this.memo = request.getMemo();
+        this.filePath = request.getImagePath();
+        this.categoryId = request.getCategoryId();
+        this.categoryName = categoryName;
+
+        this.items = request.getItems().stream()
+                .map(ReceiptItemResponse::new)
+                .toList();
+    }
+
     // 에러 메시지 생성자
     public ReceiptResponse(String errorMessage) {
         this.errorMessage = errorMessage;
