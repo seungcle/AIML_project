@@ -76,6 +76,7 @@ public class NotificationService {
         return NotificationResponse.fromEntity(notification);
     }
 
+    // 그룹 멤버에게 전송하는 알림
     @Transactional
     public List<Map<String, Object>> createGroupNotification(Long groupId, Long senderId, String message) {
         log.info("그룹 알림 생성 시작 - 그룹ID: {}, 발신자ID: {}", groupId, senderId);
@@ -129,5 +130,29 @@ public class NotificationService {
             notificationResults.add(result);
         }
         return notificationResults;
+    }
+
+    // 멤버 1명에게 전송
+    @Transactional
+    public void sendNotification(Long memberId, String message) {
+        Notification notification = new Notification();
+        notification.setMemberId(memberId);
+        notification.setMessage(message);
+
+        // DB 저장
+        notificationRepository.save(notification);
+
+        // SSE 전송
+        List<SseEmitter> emitters = sseEmitterRepository.getEmitters(memberId);
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("NEW_NOTIFICATION")
+                        .data(NotificationResponse.fromEntity(notification)));
+            } catch (IOException e) {
+                log.error("SSE 전송 실패: {}", e.getMessage());
+                sseEmitterRepository.removeEmitter(memberId, emitter);
+            }
+        }
     }
 }

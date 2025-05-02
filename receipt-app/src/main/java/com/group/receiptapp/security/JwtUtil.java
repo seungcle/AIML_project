@@ -2,6 +2,7 @@ package com.group.receiptapp.security;
 
 import com.group.receiptapp.service.login.CustomUserDetailsService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.annotation.PostConstruct;
@@ -12,12 +13,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 @Component
+@Slf4j
 public class JwtUtil {
 
     @Value("${spring.jwt.secret-key}") // application.yml에서 비밀 키를 가져옴
@@ -90,6 +94,18 @@ public class JwtUtil {
             return authorizationHeader.substring(7);
         }
         return null;
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            log.warn("Invalid JWT: {}", e.getMessage());
+            return false;
+        }
     }
 
 }

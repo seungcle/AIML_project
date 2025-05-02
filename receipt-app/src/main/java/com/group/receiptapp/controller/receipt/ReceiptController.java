@@ -1,10 +1,14 @@
 package com.group.receiptapp.controller.receipt;
 import com.group.receiptapp.domain.member.Member;
+import com.group.receiptapp.dto.ocr.OcrResponse;
 import com.group.receiptapp.dto.receipt.ReceiptResponse;
+import com.group.receiptapp.dto.receipt.ReceiptSaveRequest;
 import com.group.receiptapp.security.JwtUtil;
 import com.group.receiptapp.service.login.CustomUserDetailsService;
+import com.group.receiptapp.service.notification.NotificationService;
 import com.group.receiptapp.service.ocr.OcrService;
 import com.group.receiptapp.service.receipt.ReceiptService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,65 +26,75 @@ public class ReceiptController {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
     private final ReceiptService receiptService;
+    private final NotificationService notificationService;
 
-    public ReceiptController(OcrService ocrService, JwtUtil jwtUtil, CustomUserDetailsService customUserDetailsService, ReceiptService receiptService) {
+    public ReceiptController(OcrService ocrService, JwtUtil jwtUtil,
+                             CustomUserDetailsService customUserDetailsService,
+                             ReceiptService receiptService,
+                             NotificationService notificationService) {
         this.ocrService = ocrService;
         this.jwtUtil = jwtUtil;
         this.customUserDetailsService = customUserDetailsService;
         this.receiptService = receiptService;
+        this.notificationService = notificationService;
     }
 
-    @PostMapping("/process")
-    public ResponseEntity<ReceiptResponse> processAll(@RequestParam("file") MultipartFile file,
-                                                      @RequestHeader("Authorization") String authorizationHeader) {
-        try {
+    @PostMapping("/preview")
+    public ResponseEntity<ReceiptResponse> previewReceipt(
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String authorizationHeader) {
 
-            // OCR 처리 및 DB 저장
-            ReceiptResponse receiptResponse = ocrService.processOcrAndSaveReceipt(file, authorizationHeader);
-            return ResponseEntity.ok(receiptResponse);
+        try {
+            ReceiptResponse response = ocrService.previewReceiptWithAuth(file, authorizationHeader);
+            return ResponseEntity.ok(response);
         } catch (SecurityException e) {
-            return ResponseEntity.status(401).body(new ReceiptResponse(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ReceiptResponse("Unauthorized: " + e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(new ReceiptResponse("Error processing receipt: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ReceiptResponse("OCR error: " + e.getMessage()));
         }
     }
 
-    /*
     @PostMapping("/save")
-    public ResponseEntity<ReceiptResponse> saveReceipt(@RequestBody OcrResponse ocrResponse,
-                                              @RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<ReceiptResponse> saveReceipt(@RequestBody ReceiptSaveRequest request,
+                                                       @RequestHeader("Authorization") String authorization) {
         try {
-            // JWT 토큰에서 사용자 이름 추출
-            String token = authorization.substring(7);  // "Bearer " 제거
+            String token = authorization.substring(7);  // Bearer 제거
             String username = jwtUtil.extractUsername(token);
-
-            // 사용자 정보를 로드하여 memberId를 가져옴
             Member member = customUserDetailsService.loadUserByUsernameAsMember(username);
-            Long memberId = member.getId(); // Member 엔티티에서 getId() 호출
 
-            // OCR 응답을 처리하여 영수증을 저장
-            ReceiptResponse receiptResponse = receiptService.saveReceiptFromOcr(ocrResponse, memberId);
+            // 사용자 ID 설정
+            request.setMemberId(member.getId());
+
+            // 저장 처리
+            ReceiptResponse receiptResponse = receiptService.saveReceipt(request);
+            Long groupId = member.getGroup().getId();
+
+            notificationService.createGroupNotification(
+                    groupId,
+                    member.getId(),
+                    member.getName() + "님이 새 영수증을 등록했습니다."
+            );
 
             return ResponseEntity.ok(receiptResponse);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(new ReceiptResponse("Error saving receipt: " + e.getMessage()));
         }
     }
-     */
 
     @GetMapping("/my")
-    public ResponseEntity<List<ReceiptResponse>> getUserReceipts(@RequestHeader("Authorization") String authorization) {
+    public ResponseEntity<List<ReceiptResponse>> getUserReceiptsByYearMonth(
+            @RequestHeader("Authorization") String authorization,
+            @RequestParam("year") int year,
+            @RequestParam("month") int month) {
+
         try {
-            // JWT 토큰에서 사용자 이름 추출
-            String token = authorization.substring(7); // "Bearer " 제거
+            String token = jwtUtil.resolveToken(authorization);
             String username = jwtUtil.extractUsername(token);
-
-            // 사용자 정보를 로드하여 memberId를 가져옴
             Member member = customUserDetailsService.loadUserByUsernameAsMember(username);
-            Long memberId = member.getId(); // Member 엔티티에서 getId() 호출
 
-            // 로그인한 유저의 모든 영수증 조회
-            List<ReceiptResponse> receipts = receiptService.getReceiptsByMemberId(memberId);
+            List<ReceiptResponse> receipts = receiptService.getReceiptsByMemberIdAndYearMonth(member.getId(), year, month);
 
             return ResponseEntity.ok(receipts);
         } catch (Exception e) {
@@ -115,5 +129,4 @@ public class ReceiptController {
         }
     }
 
-    
 }

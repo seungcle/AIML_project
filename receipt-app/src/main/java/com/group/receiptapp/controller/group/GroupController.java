@@ -6,9 +6,11 @@ import com.group.receiptapp.domain.join.JoinRequest;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.dto.GroupResponse;
 import com.group.receiptapp.dto.join.JoinRequestResponse;
+import com.group.receiptapp.repository.member.MemberRepository;
 import com.group.receiptapp.service.email.EmailService;
 import com.group.receiptapp.service.group.GroupService;
 import com.group.receiptapp.service.member.MemberService;
+import com.group.receiptapp.service.notification.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,11 +29,16 @@ public class GroupController {
     private final MemberService memberService;
     private final GroupService groupService;
     private final EmailService emailService;
+    private final NotificationService notificationService;
+    private final MemberRepository memberRepository;
 
-    public GroupController(MemberService memberService, GroupService groupService, EmailService emailService) {
+    public GroupController(MemberService memberService, GroupService groupService, EmailService emailService,
+                           NotificationService notificationService, MemberRepository memberRepository) {
         this.memberService = memberService; // memberService 주입
         this.groupService = groupService; // groupService 주입
         this.emailService = emailService;
+        this.notificationService = notificationService;
+        this.memberRepository = memberRepository;
     }
 
     @PostMapping(value = "/create", produces = "application/json")
@@ -49,8 +56,19 @@ public class GroupController {
         String email = principal.getName();
         Member member = memberService.getMemberByEmail(email);
 
+        // 가입 요청 저장
         JoinRequest joinRequest = groupService.requestToJoinGroup(groupId, member);
         JoinRequestResponse response = JoinRequestResponse.fromEntity(joinRequest);
+
+        // 관리자 조회
+        Member admin = memberRepository.findAdminByGroupId(groupId)
+                .orElseThrow(() -> new IllegalStateException("그룹 관리자 정보를 찾을 수 없습니다."));
+
+        // 알림 전송
+        notificationService.sendNotification(
+                admin.getId(),
+                member.getName() + "님이 그룹에 가입을 요청했습니다."
+        );
 
         return ResponseEntity.ok(response);
     }
@@ -67,6 +85,11 @@ public class GroupController {
         // 3. Member의 group 필드 업데이트
         member.setGroup(group);
         memberService.updateMember(member); // 데이터베이스에 저장
+
+        notificationService.sendNotification(
+                member.getId(),
+                group.getName() + " 그룹 가입이 승인되었습니다!"
+        );
 
         // 이메일 알림 전송
         String toEmail = groupService.getMemberEmailByJoinRequestId(joinRequestId);
@@ -86,6 +109,15 @@ public class GroupController {
     @PostMapping("/requests/reject/{joinRequestId}")
     public ResponseEntity<Map<String, String>> rejectJoinRequest(@PathVariable Long joinRequestId) {
         groupService.updateJoinRequestStatus(joinRequestId, JoinRequest.Status.REJECTED);
+
+        JoinRequest joinRequest = groupService.getJoinRequestById(joinRequestId);
+        Member member = joinRequest.getMember();
+        Group group = joinRequest.getGroup();
+
+        notificationService.sendNotification(
+                member.getId(),
+                group.getName() + " 그룹 가입 요청이 거절되었습니다."
+        );
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "가입 요청이 거절되었습니다.");

@@ -71,10 +71,4 @@ public class Receipt {
         return receiptImage != null ? receiptImage.getFilePath() : null; // 이미지 경로 반환
     }
 
-    public void setImagePath(String imagePath) {
-        if (receiptImage == null) {
-            receiptImage = new ReceiptImage(); // 이미지 엔티티가 없으면 생성
-        }
-        receiptImage.setFilePath(imagePath); // 이미지 경로 설정
-    }
 }

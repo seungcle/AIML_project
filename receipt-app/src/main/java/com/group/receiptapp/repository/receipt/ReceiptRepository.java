@@ -83,4 +83,13 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             @Param("year") int year,
             @Param("month") int month);
 
+    @Query("SELECT r FROM Receipt r " +
+            "WHERE r.member.id = :memberId " +
+            "AND FUNCTION('YEAR', r.date) = :year " +
+            "AND FUNCTION('MONTH', r.date) = :month " +
+            "AND r.isDeleted = false")
+    List<Receipt> findByMemberIdAndYearMonth(@Param("memberId") Long memberId,
+                                             @Param("year") int year,
+                                             @Param("month") int month);
+
 }

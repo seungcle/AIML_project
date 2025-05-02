@@ -102,4 +102,94 @@ public class OcrService {
     }
 
 
+    @Transactional
+    public ReceiptResponse previewReceiptWithAuth(MultipartFile file, String authorizationHeader) throws IOException {
+        String token = jwtUtil.resolveToken(authorizationHeader);
+        if (token == null) {
+            throw new SecurityException("JWT 토큰이 존재하지 않습니다.");
+        }
+
+        String username = jwtUtil.extractUsername(token);
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+
+        // ✅ validateToken의 두 번째 인자 추가
+        if (!jwtUtil.validateToken(token, userDetails)) {
+            throw new SecurityException("유효하지 않은 JWT 토큰입니다.");
+        }
+
+        Member member = customUserDetailsService.loadUserByUsernameAsMember(username);
+
+        // 파일 저장
+        String imagePath = receiptService.saveImageToDisk(file);
+
+        // OCR 처리
+        byte[] fileData = file.getBytes();
+        String fileName = file.getOriginalFilename();
+        String fileFormat = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+        OcrRequest.Image image = new OcrRequest.Image();
+        image.setFormat(fileFormat);
+        image.setName(fileName);
+        image.setData(Base64.getEncoder().encodeToString(fileData));
+
+        OcrRequest ocrRequest = new OcrRequest();
+        ocrRequest.setVersion("V2");
+        ocrRequest.setRequestId(UUID.randomUUID().toString());
+        ocrRequest.setTimestamp(System.currentTimeMillis());
+        ocrRequest.setImages(Collections.singletonList(image));
+
+        OcrResponse ocrResponse = callClovaOcrApi(ocrRequest);
+        ReceiptSaveRequest parsed = ocrResultParser.parseOcrResponse(ocrResponse);
+
+        Long categoryId = receiptService.getCategoryIdFromAI(parsed.getStoreName(), parsed.getItems());
+        parsed.setCategoryId(categoryId);
+
+        String categoryName = receiptService.getCategoryNameById(categoryId);
+
+        ReceiptResponse response = new ReceiptResponse(parsed, categoryName);
+        response.setUserId(member.getId());
+        response.setFilePath(imagePath);
+
+        return response;
+    }
+
+    public ReceiptResponse ocrOnly(MultipartFile file) throws IOException {
+        byte[] fileData = file.getBytes();
+        String fileName = file.getOriginalFilename();
+        String fileFormat = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+
+        // OCR 요청 준비
+        OcrRequest.Image image = new OcrRequest.Image();
+        image.setFormat(fileFormat);
+        image.setName(fileName);
+        image.setData(Base64.getEncoder().encodeToString(fileData));
+
+        OcrRequest ocrRequest = new OcrRequest();
+        ocrRequest.setVersion("V2");
+        ocrRequest.setRequestId(UUID.randomUUID().toString());
+        ocrRequest.setTimestamp(System.currentTimeMillis());
+        ocrRequest.setImages(Collections.singletonList(image));
+
+        // OCR 호출
+        OcrResponse ocrResponse = callClovaOcrApi(ocrRequest);
+        if (ocrResponse == null || ocrResponse.getImages().isEmpty()) {
+            log.error("OCR API returned null or empty images.");
+            throw new RuntimeException("Invalid OCR response or empty images.");
+        }
+
+        log.info("OCR Response: {}", ocrResponse);  // OCR 응답 전체 로그 출력
+
+        // OCR 결과 파싱
+        ReceiptSaveRequest parsed = ocrResultParser.parseOcrResponse(ocrResponse);
+
+        // 💡 카테고리 자동 분류 포함
+        Long categoryId = receiptService.getCategoryIdFromAI(parsed.getStoreName(), parsed.getItems());
+        parsed.setCategoryId(categoryId);
+
+        String categoryName = receiptService.getCategoryNameById(categoryId);
+
+
+        // 응답에 categoryId 포함된 ReceiptResponse 생성
+        return new ReceiptResponse(parsed, categoryName);
+    }
 }

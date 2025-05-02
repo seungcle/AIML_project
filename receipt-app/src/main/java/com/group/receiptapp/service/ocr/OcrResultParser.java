@@ -62,7 +62,7 @@ public class OcrResultParser {
                         .ifPresent(totalAmountText -> {
                             try {
                                 BigDecimal totalAmount = new BigDecimal(totalAmountText);
-                                request.setTotalAmount(totalAmount);
+                                request.setAmount(totalAmount);
                             } catch (NumberFormatException e) {
                                 log.error("Total amount parsing failed: {}", totalAmountText, e);
                             }
