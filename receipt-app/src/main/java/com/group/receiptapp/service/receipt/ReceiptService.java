@@ -133,6 +133,18 @@ public class ReceiptService {
     }
 
     @Transactional
+    public ReceiptResponse saveReceiptFromOcr(OcrResponse ocrResponse, Long memberId) {
+        // OCR 결과 → ReceiptSaveRequest로 변환
+        ReceiptSaveRequest request = ocrResultParser.parseOcrResponse(ocrResponse);
+
+        // 사용자 ID 설정
+        request.setMemberId(memberId);
+
+        // 저장 처리 (기존 saveReceipt 로직 재사용)
+        return saveReceipt(request);
+    }
+
+    @Transactional
     public ReceiptResponse saveReceipt(ReceiptSaveRequest request) {
         try {
             log.info("Parsed ReceiptSaveRequest: {}", request);
@@ -165,16 +177,28 @@ public class ReceiptService {
             receipt.setStoreName(request.getStoreName());
             receipt.setStoreAddress(request.getStoreAddress());
             receipt.setDate(request.getDate());
-            receipt.setAmount(request.getTotalAmount());
+            log.info("✅ storeName: {}", request.getStoreName());
+            log.info("✅ totalAmount: {}", request.getAmount());
+            log.info("✅ date: {}", request.getDate());
+            log.info("✅ amount set to receipt: {}", receipt.getAmount());
+            receipt.setAmount(request.getAmount());
+            log.info("✅ storeName: {}", request.getStoreName());
+            log.info("✅ totalAmount: {}", request.getAmount());
+            log.info("✅ date: {}", request.getDate());
+            log.info("✅ amount set to receipt: {}", receipt.getAmount());
             receipt.setMemo(request.getMemo());
             receipt.setMember(member);
             receipt.setCategory(category);
-            receipt.setImagePath(request.getImagePath());
 
-            if (request.getImagePath() != null) {
+            if (request.getImagePath() != null && !request.getImagePath().isBlank()) {
                 ReceiptImage receiptImage = new ReceiptImage();
-                receiptImage.setFilePath(request.getImagePath());  // 파일 경로 저장
-                receipt.setReceiptImage(receiptImage);  // 영수증에 이미지 연결
+                receiptImage.setFilePath(request.getImagePath());
+
+                log.info("ReceiptImage 생성됨 filePath: {}", receiptImage.getFilePath());
+
+                receipt.setReceiptImage(receiptImage);
+            } else {
+                log.warn("imagePath가 null 혹은 blank: ReceiptImage 생성 생략");
             }
 
             if (receipt.getItems() == null) {
@@ -248,6 +272,13 @@ public class ReceiptService {
 
         log.info("File saved successfully: {}", uploadPath.toString());
         return uploadPath.toString();
+    }
+
+
+    public String getCategoryNameById(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+                .map(Category::getName)
+                .orElse("기타");  // 기본값 설정 가능
     }
 
     // 그룹-카테고리별 지출 내역 조회
@@ -378,6 +409,11 @@ public class ReceiptService {
             return 1L; // 기본값 사용
         }
     }
+
+    public Long getCategoryIdFromAI(String storeName, List<ReceiptItemRequest> items) {
+        return getCategoryFromAI(storeName, items);
+    }
+
     // name -> id
     private Long mapCategoryNameToId(String categoryName) {
         Map<String, Long> categoryMap = new HashMap<>();
