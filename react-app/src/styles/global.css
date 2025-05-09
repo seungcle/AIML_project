@@ -1,0 +1,21 @@
+:root {
+  --accent: #4F46E5;
+  --bg-color: #f9fafb;
+  --font: 'Noto Sans KR', sans-serif;
+  --text-color: #111827;
+  --radius: 12px;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+:root {
+  --accent: #6366F1; /* 예: 인디고 */
+}
+

@@ -1,11 +1,12 @@
-name: Deploy Receipt-App to EC2
+name: CI/CD with Docker
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'receipt-app/**' 
+      - 'receipt-app/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -13,32 +14,70 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build receipt-app with Gradle
+      - name: Gradle Build without Daemon
         run: |
           cd receipt-app
-          chmod +x gradlew
-          ./gradlew build -x test
+          chmod +x ./gradlew
+          ./gradlew clean bootJar --no-daemon
 
-      - name: Deploy receipt-app to EC2
-        env:
-          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          HOST: ${{ secrets.EC2_HOST }}
-          USER: ${{ secrets.EC2_USER }}
+      - name: Docker Build & Push
         run: |
-          echo "$PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-          scp -i private_key.pem receipt-app/build/libs/receipt-app-0.0.1-SNAPSHOT.jar $USER@$HOST:/home/ec2-user/receipt-app/
-          ssh -i private_key.pem $USER@$HOST << 'EOF'
+          cd receipt-app
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          docker build -t receipt-app:latest .
+          docker tag receipt-app:latest ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # 디렉토리 생성
+            mkdir -p /home/ec2-user/receipt-app
+
+            # .env 파일 생성
+            cat <<EOF > /home/ec2-user/receipt-app/.env
+            SPRING_JWT_SECRET_KEY=${{ secrets.SPRING_JWT_SECRET_KEY }}
+            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
+            DB_USERNAME_LOCAL=${{ secrets.DB_USERNAME_LOCAL }}
+            DB_PASSWORD_LOCAL=${{ secrets.DB_PASSWORD_LOCAL }}
+            SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}
+            SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}
+            SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}
+            RECEIPT_IMAGE_PATH=${{ secrets.RECEIPT_IMAGE_PATH }}
+            CLOVA_OCR_CLIENT_ID=${{ secrets.CLOVA_OCR_CLIENT_ID }}
+            CLOVA_OCR_CLIENT_SECRET=${{ secrets.CLOVA_OCR_CLIENT_SECRET }}
+            CLOVA_OCR_URL=${{ secrets.CLOVA_OCR_URL }}
+            EOF
+
+            # 디렉토리 이동 및 최신 이미지 pull
             cd /home/ec2-user/receipt-app
-            pkill -f 'receipt-app-0.0.1-SNAPSHOT.jar' || true
-            nohup java -jar receipt-app-0.0.1-SNAPSHOT.jar --spring.profiles.active=dev >> app.log 2>&1 &
-          EOF
-          rm -f private_key.pem
+            docker pull ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
+
+            # 기존 컨테이너 중지 및 제거
+            docker stop receipt-app || true
+            docker rm receipt-app || true
+
+            # 새 컨테이너 실행
+            docker run -d \
+              --name receipt-app \
+              -p 8080:8080 \
+              --restart always \
+              --env-file .env \
+              ${{ secrets.DOCKER_USERNAME }}/receipt-app:latest
+
+            # 불필요한 이미지 정리
+            docker image prune -f
