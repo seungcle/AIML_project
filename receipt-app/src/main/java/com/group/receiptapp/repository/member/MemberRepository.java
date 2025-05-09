@@ -3,6 +3,8 @@ package com.group.receiptapp.repository.member;
 import com.group.receiptapp.domain.group.Group;
 import com.group.receiptapp.domain.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,4 +24,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     // 탈퇴하지 않은 회원 조회
     List<Member> findAllByIsActiveTrue();
+
+    @Query("SELECT m FROM Member m WHERE m.group.id = :groupId AND m.isAdmin = true")
+    Optional<Member> findAdminByGroupId(@Param("groupId") Long groupId);
 }

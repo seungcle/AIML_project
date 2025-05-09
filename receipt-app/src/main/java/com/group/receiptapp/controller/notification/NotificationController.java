@@ -35,10 +35,14 @@ public class NotificationController {
 
     // SSE 구독
     @GetMapping("/subscribe/{memberId}")
-    public ResponseEntity<SseEmitter> subscribe(@PathVariable Long memberId, @RequestParam(required = false) String token) {
+    public ResponseEntity<SseEmitter> subscribe(
+            @PathVariable Long memberId,
+            @RequestHeader("Authorization") String authorizationHeader) {
+
         try {
-            if (token == null || token.isEmpty()) {
-                return ResponseEntity.badRequest().body(null);
+            String token = jwtUtil.resolveToken(authorizationHeader);
+            if (token == null || token.isEmpty() || !jwtUtil.validateToken(token)) {
+                return ResponseEntity.status(401).body(null);
             }
 
             String email = jwtUtil.extractUsername(token);
@@ -55,22 +59,38 @@ public class NotificationController {
         }
     }
 
+    // 안 읽은 알림 목록 조회
     @GetMapping("/{memberId}")
-    public ResponseEntity<List<Notification>> getNotifications(@PathVariable Long memberId) {
-        List<Notification> notifications = notificationService.getUnreadNotifications(memberId);
-        return ResponseEntity.ok(notifications);
+    public ResponseEntity<List<Notification>> getNotifications(
+            @PathVariable Long memberId,
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        try {
+            String token = jwtUtil.resolveToken(authorizationHeader);
+            if (token == null || !jwtUtil.validateToken(token)) {
+                return ResponseEntity.status(401).build();
+            }
+
+            String email = jwtUtil.extractUsername(token);
+            Long tokenMemberId = loginService.getMemberIdByEmail(email);
+
+            if (!tokenMemberId.equals(memberId)) {
+                return ResponseEntity.status(403).build();
+            }
+
+            List<Notification> notifications = notificationService.getUnreadNotifications(memberId);
+            return ResponseEntity.ok(notifications);
+        } catch (Exception e) {
+            log.error("알림 조회 오류: {}", e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
     }
 
+    // 알림 읽음 처리하기
     @PostMapping("/read/{id}")
     public ResponseEntity<NotificationResponse> markAsRead(@PathVariable Long id) {
         NotificationResponse response = notificationService.markNotificationAsRead(id);
         return ResponseEntity.ok(response);
     }
 
-    // 사용자 수동 알림 off 기능 추가시 사용
-    @PostMapping("/unsubscribe/{memberId}")
-    public ResponseEntity<Void> unsubscribe(@PathVariable Long memberId) {
-        notificationService.unsubscribe(memberId);
-        return ResponseEntity.ok().build();
-    }
 }

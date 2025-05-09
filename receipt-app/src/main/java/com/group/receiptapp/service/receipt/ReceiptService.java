@@ -427,4 +427,11 @@ public class ReceiptService {
         return categoryMap.getOrDefault(categoryName, 1L); // 기본값: 기타(1)
     }
 
+    public List<ReceiptResponse> getReceiptsByMemberIdAndYearMonth(Long memberId, int year, int month) {
+        List<Receipt> receipts = receiptRepository.findByMemberIdAndYearMonth(memberId, year, month);
+        return receipts.stream()
+                .map(ReceiptResponse::fromEntity)
+                .toList();
+    }
+
 }

@@ -120,6 +120,11 @@ public class GroupService {
         return memberRepository.findByGroup(group); // 그룹 ID 대신 Group 객체로 조회
     }
 
+    public Group getGroupById(Long groupId) {
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 그룹이 존재하지 않습니다."));
+    }
+
     public Optional<Group> findByName(String name) {
         return groupRepository.findByName(name);
     }
