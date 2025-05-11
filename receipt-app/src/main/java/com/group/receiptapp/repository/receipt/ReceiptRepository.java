@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,5 +93,15 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
     List<Receipt> findByMemberIdAndYearMonth(@Param("memberId") Long memberId,
                                              @Param("year") int year,
                                              @Param("month") int month);
+
+    // 중복 영수증 체크
+    @Query("SELECT COUNT(r) > 0 FROM Receipt r " +
+            "WHERE r.date = :date " +
+            "AND r.amount = :amount " +
+            "AND r.member.group.id = :groupId " +
+            "AND r.isDeleted = false")
+    boolean existsDuplicate(@Param("date") LocalDate date,
+                            @Param("amount") BigDecimal amount,
+                            @Param("groupId") Long groupId);
 
 }

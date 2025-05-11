@@ -24,6 +24,9 @@ public class Group {
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Member> members = new ArrayList<>(); // 그룹에 속한 사용자들
 
+    @Column(name = "prevent_duplicate_receipt", nullable = false)
+    private boolean preventDuplicateReceipt = false;
+
     public Group() {}
 
     public Group(Long id) {
