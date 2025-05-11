@@ -48,6 +48,8 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	runtimeOnly 'mysql:mysql-connector-java'
 	implementation 'org.apache.poi:poi-ooxml:5.2.3'
+	implementation 'org.flywaydb:flyway-core:9.22.3'
+	implementation 'org.flywaydb:flyway-mysql:9.22.3'
 
 
 
