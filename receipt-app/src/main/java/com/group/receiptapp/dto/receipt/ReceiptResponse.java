@@ -81,12 +81,6 @@ public class ReceiptResponse {
         this.duplicate = duplicate;
     }
 
-    // 에러 메시지 생성자
-    public ReceiptResponse(String errorMessage) {
-        this.errorMessage = errorMessage;
-        this.duplicate = false;
-    }
-
     public static ReceiptResponse fromEntity(Receipt receipt, List<Map<String, Object>> notificationResults) {
         return new ReceiptResponse(receipt, notificationResults);
     }

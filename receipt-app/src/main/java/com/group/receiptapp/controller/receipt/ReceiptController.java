@@ -49,10 +49,10 @@ public class ReceiptController {
             return ResponseEntity.ok(response);
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ReceiptResponse("Unauthorized: " + e.getMessage()));
+                    .body(new ReceiptResponse("Unauthorized: " + e.getMessage(), false));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ReceiptResponse("OCR error: " + e.getMessage()));
+                    .body(new ReceiptResponse("OCR error: " + e.getMessage(), false));
         }
     }
 
@@ -79,7 +79,7 @@ public class ReceiptController {
 
             return ResponseEntity.ok(receiptResponse);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(new ReceiptResponse("Error saving receipt: " + e.getMessage()));
+            return ResponseEntity.status(500).body(new ReceiptResponse("Error saving receipt: " + e.getMessage(), false));
         }
     }
 
@@ -121,11 +121,11 @@ public class ReceiptController {
             ReceiptResponse deletedReceipt = receiptService.deleteReceipt(receiptId, member.getId());
             return ResponseEntity.ok(deletedReceipt);  // 삭제된 영수증 정보 반환
         } catch (SecurityException e) {
-            return ResponseEntity.status(401).body(new ReceiptResponse("Unauthorized: " + e.getMessage()));
+            return ResponseEntity.status(401).body(new ReceiptResponse("Unauthorized: " + e.getMessage(), false));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(new ReceiptResponse("Receipt not found: " + e.getMessage()));
+            return ResponseEntity.status(404).body(new ReceiptResponse("Receipt not found: " + e.getMessage(), false));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(new ReceiptResponse("Error deleting receipt: " + e.getMessage()));
+            return ResponseEntity.status(500).body(new ReceiptResponse("Error deleting receipt: " + e.getMessage(), false));
         }
     }
 
