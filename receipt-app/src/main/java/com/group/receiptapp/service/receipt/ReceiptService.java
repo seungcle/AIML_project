@@ -234,14 +234,14 @@ public class ReceiptService {
 
             // 저장된 Receipt를 Response로 반환
             return ReceiptResponse.fromEntity(receipt, notificationResults);
-        } catch (IllegalStateException e) {
-            if (e.getMessage().contains("중복")) {
+        }  catch (IllegalStateException e) {
+            if (e.getMessage().contains("영수증이 이미 존재합니다")) {
                 return new ReceiptResponse("같은 그룹 내 동일 날짜와 금액의 영수증이 이미 존재합니다.", true);
             }
-            return new ReceiptResponse("영수증 저장 중 오류 발생: " + e.getMessage());
+            return new ReceiptResponse("영수증 저장 중 오류 발생: " + e.getMessage(), false);
         } catch (Exception e) {
             log.error("Error saving receipt: {}", e.getMessage(), e);
-            return new ReceiptResponse("영수증 저장 중 오류 발생: " + e.getMessage());
+            return new ReceiptResponse("영수증 저장 중 오류 발생: " + e.getMessage(), false);
         }
     }
 
