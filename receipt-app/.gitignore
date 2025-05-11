@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Flyway 로컬용 마이그레이션 파일 무시
+src/main/resources/db/migration/V1__*.sql

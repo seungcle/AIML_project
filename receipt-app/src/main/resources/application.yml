@@ -29,6 +29,12 @@ spring:
   config:
     activate:
       on-profile: local
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
   datasource:
     url: "jdbc:mysql://localhost/receipt"
     username: ${DB_USERNAME_LOCAL}
@@ -36,7 +42,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update #   create-drop none
+      ddl-auto:  none #   create-drop none / update
     properties:
       hibernate:
         show_sql: true
@@ -66,6 +72,11 @@ spring:
   config:
     activate:
       on-profile: dev
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
 
   web:
     resources:
