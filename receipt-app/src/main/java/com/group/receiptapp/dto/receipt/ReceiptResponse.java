@@ -33,6 +33,7 @@ public class ReceiptResponse {
     private List<ReceiptItemResponse> items; // 상품 리스트
     private List<Map<String, Object>> notificationResults; // 알림 전송 결과
     private String errorMessage; // 에러 메시지를 반환하기 위한 필드
+    private Boolean duplicate;
 
     public ReceiptResponse(Receipt receipt, List<Map<String, Object>> notificationResults) {
         this.receiptId = receipt.getId();
@@ -56,6 +57,7 @@ public class ReceiptResponse {
                 ))
                 .toList();
         this.notificationResults = notificationResults;
+        this.duplicate = false;
     }
 
     public ReceiptResponse(ReceiptSaveRequest request, String categoryName) {
@@ -71,11 +73,18 @@ public class ReceiptResponse {
         this.items = request.getItems().stream()
                 .map(ReceiptItemResponse::new)
                 .toList();
+        this.duplicate = false;
+    }
+
+    public ReceiptResponse(String errorMessage, boolean duplicate) {
+        this.errorMessage = errorMessage;
+        this.duplicate = duplicate;
     }
 
     // 에러 메시지 생성자
     public ReceiptResponse(String errorMessage) {
         this.errorMessage = errorMessage;
+        this.duplicate = false;
     }
 
     public static ReceiptResponse fromEntity(Receipt receipt, List<Map<String, Object>> notificationResults) {
@@ -83,6 +92,8 @@ public class ReceiptResponse {
     }
 
     public static ReceiptResponse fromEntity(Receipt receipt) {
-        return new ReceiptResponse(receipt, new ArrayList<>()); // 빈 알림 결과 리스트 포함
+        ReceiptResponse response = new ReceiptResponse(receipt, new ArrayList<>());
+        response.setDuplicate(false);
+        return response;
     }
 }

@@ -46,19 +46,22 @@ public class ReceiptService {
     private final OcrResultParser ocrResultParser;
     private final NotificationService notificationService;
     private final RestTemplate restTemplate;
+    private final ReceiptCheckService receiptCheckService;
 
     @Value("${receipt.image-path}")
     private String uploadDir;
 
     public ReceiptService(ReceiptRepository receiptRepository, MemberRepository memberRepository,
                           CategoryRepository categoryRepository, OcrResultParser ocrResultParser,
-                          NotificationService notificationService, RestTemplate restTemplate) {
+                          NotificationService notificationService, RestTemplate restTemplate,
+                          ReceiptCheckService receiptCheckService) {
         this.receiptRepository = receiptRepository;
         this.memberRepository = memberRepository;
         this.categoryRepository = categoryRepository;
         this.ocrResultParser = ocrResultParser;
         this.notificationService = notificationService;
         this.restTemplate = restTemplate;
+        this.receiptCheckService = receiptCheckService;
     }
 
     /*
@@ -164,6 +167,11 @@ public class ReceiptService {
             }
             Long groupId = member.getGroup().getId();
 
+            // 그룹 중복 체크하기 설정이 true인 경우 중복 검사하기
+            if (member.getGroup().isPreventDuplicateReceipt()) {
+                receiptCheckService.validateDuplicate(request, groupId);
+            }
+
             Long categoryId = getCategoryFromAI(request.getStoreName(), request.getItems());
             log.info("API 응답 받은 카테고리 ID: {}", categoryId);
             request.setCategoryId(categoryId);
@@ -226,6 +234,11 @@ public class ReceiptService {
 
             // 저장된 Receipt를 Response로 반환
             return ReceiptResponse.fromEntity(receipt, notificationResults);
+        } catch (IllegalStateException e) {
+            if (e.getMessage().contains("중복")) {
+                return new ReceiptResponse("같은 그룹 내 동일 날짜와 금액의 영수증이 이미 존재합니다.", true);
+            }
+            return new ReceiptResponse("영수증 저장 중 오류 발생: " + e.getMessage());
         } catch (Exception e) {
             log.error("Error saving receipt: {}", e.getMessage(), e);
             return new ReceiptResponse("영수증 저장 중 오류 발생: " + e.getMessage());

@@ -8,4 +8,7 @@ import java.util.Optional;
 @Repository
 public interface GroupRepository extends JpaRepository<Group, Long> {
     Optional<Group> findByName(String name);
+
+    Optional<Group> findByNameAndPreventDuplicateReceipt(String name, Boolean preventDuplicateReceipt);
+
 }
