@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class Group {
 
     @Column(name = "prevent_duplicate_receipt", nullable = false)
     private boolean preventDuplicateReceipt = false;
+
+    @Column(name = "spending_limit", nullable = false, columnDefinition = "DECIMAL(10, 2) DEFAULT 0")
+    private BigDecimal spendingLimit = BigDecimal.ZERO;  // 기본값 설정
 
     public Group() {}
 
