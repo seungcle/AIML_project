@@ -7,10 +7,14 @@ import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.dto.GroupResponse;
 import com.group.receiptapp.dto.join.JoinRequestResponse;
 import com.group.receiptapp.repository.member.MemberRepository;
+import com.group.receiptapp.security.JwtUtil;
 import com.group.receiptapp.service.email.EmailService;
+import com.group.receiptapp.service.group.GroupReceiptSettingService;
 import com.group.receiptapp.service.group.GroupService;
+import com.group.receiptapp.service.login.LoginService;
 import com.group.receiptapp.service.member.MemberService;
 import com.group.receiptapp.service.notification.NotificationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,14 +35,21 @@ public class GroupController {
     private final EmailService emailService;
     private final NotificationService notificationService;
     private final MemberRepository memberRepository;
+    private final GroupReceiptSettingService groupReceiptSettingService;
+    private final JwtUtil jwtUtil;
+    private final LoginService loginService;
 
     public GroupController(MemberService memberService, GroupService groupService, EmailService emailService,
-                           NotificationService notificationService, MemberRepository memberRepository) {
+                           NotificationService notificationService, MemberRepository memberRepository,
+                           GroupReceiptSettingService groupReceiptSettingService, JwtUtil jwtUtil, LoginService loginService) {
         this.memberService = memberService; // memberService 주입
         this.groupService = groupService; // groupService 주입
         this.emailService = emailService;
         this.notificationService = notificationService;
         this.memberRepository = memberRepository;
+        this.groupReceiptSettingService = groupReceiptSettingService;
+        this.jwtUtil = jwtUtil;
+        this.loginService = loginService;
     }
 
     @PostMapping(value = "/create", produces = "application/json")
@@ -142,5 +153,24 @@ public class GroupController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(responses);
+    }
+
+    // 중복 방지 설정 변경
+    @PutMapping("/{groupId}/check-duplicate")
+    public ResponseEntity<Void> togglePreventDuplicate(
+            @PathVariable Long groupId,
+            @RequestParam boolean enable,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authHeader.substring(7); // "Bearer " 제거
+        String email = jwtUtil.extractUsername(token);
+        Long memberId = loginService.getMemberIdByEmail(email);
+
+        groupReceiptSettingService.toggleDuplicateCheck(groupId, enable, memberId);
+        return ResponseEntity.ok().build();
     }
 }
