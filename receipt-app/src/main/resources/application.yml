@@ -77,6 +77,8 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+    schemas: receipt
+    table: flyway_schema_history
 
   web:
     resources:
@@ -132,6 +134,7 @@ logging:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
     org.springframework.security: DEBUG
+    org.flywaydb.core: debug
 
 clova:
   ocr:
