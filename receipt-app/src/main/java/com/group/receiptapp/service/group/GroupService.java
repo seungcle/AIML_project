@@ -9,6 +9,7 @@ import com.group.receiptapp.repository.join.JoinRequestRepository;
 import com.group.receiptapp.repository.member.MemberRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
