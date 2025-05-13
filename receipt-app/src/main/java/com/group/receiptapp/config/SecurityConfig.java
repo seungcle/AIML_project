@@ -61,7 +61,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/error", "/favicon.ico").permitAll()
                         .requestMatchers("/login", "/member/signup", "/css/**", "/js/**", "/logo192.png").permitAll()
                         .requestMatchers("/logout", "/images/**").authenticated()
-                        .requestMatchers("/ocr/process", "/receipts/**", "/notification/**").permitAll()
+                        .requestMatchers("/ocr/process", "/receipts/**", "/notification/**", "/group/**").permitAll()
                         .requestMatchers("/member/current").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/member/delete-account").authenticated()
                         .anyRequest().authenticated()

@@ -9,6 +9,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Service
 @RequiredArgsConstructor
 public class GroupReceiptSettingService {
@@ -31,4 +33,21 @@ public class GroupReceiptSettingService {
         group.setPreventDuplicateReceipt(enable);
         groupRepository.save(group);
     }
+
+    @Transactional
+    public void updateSpendingLimit(Long groupId, Double newLimit, Long memberId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new IllegalArgumentException("그룹이 존재하지 않습니다."));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+
+        // 관리자 권한 확인
+        if (!member.isAdmin() || !group.getId().equals(member.getGroup().getId())) {
+            throw new AccessDeniedException("해당 그룹의 관리자만 설정을 변경할 수 있습니다.");
+        }
+
+        group.setSpendingLimit(BigDecimal.valueOf(newLimit));
+        groupRepository.save(group);
+    }
+
 }
