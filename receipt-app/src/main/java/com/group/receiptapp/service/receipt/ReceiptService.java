@@ -1,6 +1,7 @@
 package com.group.receiptapp.service.receipt;
 
 import com.group.receiptapp.domain.category.Category;
+import com.group.receiptapp.domain.group.Group;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.domain.receipt.ReceiptImage;
 import com.group.receiptapp.domain.receipt.ReceiptItem;
@@ -8,6 +9,7 @@ import com.group.receiptapp.dto.receipt.*;
 import com.group.receiptapp.domain.receipt.Receipt;
 import com.group.receiptapp.dto.ocr.OcrResponse;
 import com.group.receiptapp.repository.category.CategoryRepository;
+import com.group.receiptapp.repository.group.GroupRepository;
 import com.group.receiptapp.repository.member.MemberRepository;
 import com.group.receiptapp.repository.receipt.ReceiptRepository;
 import com.group.receiptapp.service.notification.NotificationService;
@@ -47,6 +49,7 @@ public class ReceiptService {
     private final NotificationService notificationService;
     private final RestTemplate restTemplate;
     private final ReceiptCheckService receiptCheckService;
+    private final GroupRepository groupRepository;
 
     @Value("${receipt.image-path}")
     private String uploadDir;
@@ -54,7 +57,7 @@ public class ReceiptService {
     public ReceiptService(ReceiptRepository receiptRepository, MemberRepository memberRepository,
                           CategoryRepository categoryRepository, OcrResultParser ocrResultParser,
                           NotificationService notificationService, RestTemplate restTemplate,
-                          ReceiptCheckService receiptCheckService) {
+                          ReceiptCheckService receiptCheckService, GroupRepository groupRepository) {
         this.receiptRepository = receiptRepository;
         this.memberRepository = memberRepository;
         this.categoryRepository = categoryRepository;
@@ -62,6 +65,7 @@ public class ReceiptService {
         this.notificationService = notificationService;
         this.restTemplate = restTemplate;
         this.receiptCheckService = receiptCheckService;
+        this.groupRepository = groupRepository;
     }
 
     /*
@@ -166,6 +170,13 @@ public class ReceiptService {
                 throw new IllegalStateException("회원이 그룹에 속해 있지 않습니다.");
             }
             Long groupId = member.getGroup().getId();
+
+            // 지출 한도 체크
+            if (request.getAmount().compareTo(member.getGroup().getSpendingLimit()) > 0) {
+                String message = "지출 한도를 초과했습니다. Total: " + request.getAmount();
+                notificationService.sendLimitExceededNotification(groupId, member.getId(), request.getAmount(), member.getGroup().getSpendingLimit());
+                throw new IllegalStateException("지출 한도 초과");
+            }
 
             // 그룹 중복 체크하기 설정이 true인 경우 중복 검사하기
             if (member.getGroup().isPreventDuplicateReceipt()) {
@@ -446,5 +457,6 @@ public class ReceiptService {
                 .map(ReceiptResponse::fromEntity)
                 .toList();
     }
+
 
 }

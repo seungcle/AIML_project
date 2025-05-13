@@ -6,6 +6,7 @@ import com.group.receiptapp.domain.join.JoinRequest;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.dto.GroupResponse;
 import com.group.receiptapp.dto.join.JoinRequestResponse;
+import com.group.receiptapp.dto.member.MemberResponse;
 import com.group.receiptapp.repository.member.MemberRepository;
 import com.group.receiptapp.security.JwtUtil;
 import com.group.receiptapp.service.email.EmailService;
@@ -14,10 +15,12 @@ import com.group.receiptapp.service.group.GroupService;
 import com.group.receiptapp.service.login.LoginService;
 import com.group.receiptapp.service.member.MemberService;
 import com.group.receiptapp.service.notification.NotificationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +62,13 @@ public class GroupController {
 
         admin.setAdmin(true);
         Group group = groupService.createGroup(request, admin);
-        return ResponseEntity.ok(new GroupResponse(group));
+        // 생성된 그룹의 관리자로 설정
+        admin.setGroup(group);
+        admin.setAdmin(true); // 관리자로 설정
+        memberService.save(admin);  // 관리자로 저장
+
+        Group updatedGroup = groupService.getGroupById(group.getId());
+        return ResponseEntity.ok(new GroupResponse(updatedGroup));
     }
 
     @PostMapping("/join/{groupId}")
@@ -173,4 +182,38 @@ public class GroupController {
         groupReceiptSettingService.toggleDuplicateCheck(groupId, enable, memberId);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{groupId}/members")
+    public ResponseEntity<List<MemberResponse>> getGroupMembers(@PathVariable Long groupId) {
+        List<Member> members = memberRepository.findByGroupId(groupId);  // 그룹 ID 기준 조회
+        List<MemberResponse> response = members.stream()
+                .map(MemberResponse::new) // 기존 생성자 활용
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
+    // 그룹 관리자가 지출 한도 변경하기
+    @PutMapping("/{groupId}/spending-limit")
+    public ResponseEntity<GroupResponse> updateSpendingLimit(
+            @PathVariable Long groupId,
+            @RequestParam Double newSpendingLimit,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        // 인증된 사용자 확인
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = authHeader.substring(7);
+        String email = jwtUtil.extractUsername(token);
+        Long memberId = loginService.getMemberIdByEmail(email);
+
+        // 관리자 권한 확인 및 한도 변경
+        groupReceiptSettingService.updateSpendingLimit(groupId, newSpendingLimit, memberId);
+
+        // 업데이트된 그룹 정보 반환
+        Group updatedGroup = groupService.getGroupById(groupId);
+        return ResponseEntity.ok(new GroupResponse(updatedGroup));
+    }
+
 }

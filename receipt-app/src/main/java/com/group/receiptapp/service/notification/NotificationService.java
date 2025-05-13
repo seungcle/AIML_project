@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +153,38 @@ public class NotificationService {
             } catch (IOException e) {
                 log.error("SSE 전송 실패: {}", e.getMessage());
                 sseEmitterRepository.removeEmitter(memberId, emitter);
+            }
+        }
+    }
+
+    // 지출 한도 초과 알림 전송
+    public void sendLimitExceededNotification(Long groupId, Long memberId, BigDecimal spendingAmount, BigDecimal spendingLimit) {
+        // 그룹 멤버 목록 조회
+        List<Member> groupMembers = memberRepository.findByGroupId(groupId);
+
+        String message = "그룹 내 지출 한도를 초과했습니다. \n" +
+                "지출 한도: " + spendingLimit + "\n" +
+                "전체 지출: " + spendingAmount + "\n";
+
+        // 그룹 멤버들에게 알림 전송
+        for (Member member : groupMembers) {
+            Notification notification = new Notification();
+            notification.setGroupId(groupId);
+            notification.setMemberId(member.getId());  // 대상 멤버 ID
+            notification.setMessage(message);
+            notificationRepository.save(notification);  // 알림 저장
+
+            // SSE 전송
+            List<SseEmitter> emitters = sseEmitterRepository.getEmitters(member.getId());
+            for (SseEmitter emitter : emitters) {
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("NEW_NOTIFICATION")
+                            .data(NotificationResponse.fromEntity(notification)));
+                } catch (IOException e) {
+                    log.error("SSE 전송 실패: {}", e.getMessage());
+                    sseEmitterRepository.removeEmitter(member.getId(), emitter);
+                }
             }
         }
     }
