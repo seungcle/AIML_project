@@ -1,100 +1,119 @@
 /* Navbar 컨테이너 */
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    background-color: white;
-    border-bottom: 1px solid #e5e7eb;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-  }
-  
-  /* 로고 */
-  .navbar-logo a {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: #111827;
-    text-decoration: none;
-  }
-  
-  /* 오른쪽 버튼 영역 */
-  .navbar-buttons {
-    display: flex;
-    align-items: center;
-    gap: 12px; /* 버튼, 아이콘 사이 간격 */
-  }
-  
-  /* 알림 아이콘 wrapper */
-  .notification-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  
-  /* 알림 버튼 */
-  .notification-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.3rem;
-    border-radius: 6px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  
-  .notification-button:hover {
-    background-color: #f3f4f6;
-  }
-  
-  /* 알림 빨간 뱃지 (새 알림) */
-  .notification-badge {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    min-width: 16px;
-    height: 16px;
-    padding: 0 5px;
-    background-color: red;
-    color: white;
-    font-size: 11px;
-    font-weight: bold;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
 
-  /* 알림 드롭다운 */
-  .notification-dropdown {
-    position: absolute;
-    right: 0;
-    top: 36px;
-    width: 220px;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-    padding: 1rem;
-    z-index: 10;
-  }
+/* 로고 */
+.navbar-logo a {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #111827;
+  text-decoration: none;
+}
 
-  .notification-item {
-    font-size: 0.85rem;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f3f4f6;
+/* 오른쪽 버튼 영역 */
+.navbar-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 알림 아이콘 wrapper */
+.notification-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* 알림 버튼 */
+.notification-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.notification-button:hover {
+  background-color: #f3f4f6;
+}
+
+/* 빨간 뱃지 */
+.notification-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  background-color: red;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* 알림 드롭다운 */
+.notification-dropdown {
+  position: absolute;
+  right: 0;
+  top: 42px;
+  width: 260px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+  padding: 1rem;
+  z-index: 10;
+  animation: fadeSlideDown 0.15s ease-out;
+}
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
   }
-  .notification-item:last-child {
-    border-bottom: none;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  .no-notification {
-    font-size: 0.85rem;
-    color: #9ca3af;
-    text-align: center;
-  }
-  
-  
-  
+}
+
+/* 알림 항목 */
+.notification-item {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s ease;
+  border-radius: 4px;
+}
+
+.notification-item:hover {
+  background-color: #f9fafb;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.no-notification {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  text-align: center;
+}

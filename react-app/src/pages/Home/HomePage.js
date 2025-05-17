@@ -13,7 +13,6 @@ function Home() {
 
   useEffect(() => {
     console.log('Home page updated:', { userInfo, isLoggedIn });
-    console.log('userInfo 내용:', userInfo); // ⭐ 여기 추가
   }, [userInfo, isLoggedIn]);
 
   if (loading) return <p>로딩 중...</p>;
@@ -29,11 +28,9 @@ function Home() {
       alert('회원 정보가 아직 로딩되지 않았습니다. 잠시 후 다시 시도해주세요.');
       return;
     }
-    const currentYear = new Date().getFullYear();
-    const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-    navigate(`/group-member-receipts/${userInfo.id}/${currentYear}/${currentMonth}`);
+    navigate(`/group/analysis`);  
   };
-
+  
 
   const cardStyle = {
     lineHeight: '1.7',

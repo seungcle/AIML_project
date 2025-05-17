@@ -3,25 +3,45 @@ import { Link } from 'react-router-dom';
 import Logout from '../auth/Logout';
 import { useAuth } from '../auth/Auth';
 import { Bell } from 'lucide-react';
-import { fetchNotifications, markNotificationAsRead } from '../../api/notifications';
+import {
+  fetchNotifications,
+  markNotificationAsRead,
+  subscribeToNotifications,
+} from '../../api/notifications';
 import '../../styles/button.css';
 import '../../styles/navbar.css';
 
 function Navbar() {
   const { userInfo, loading } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const toggleDropdown = () => setShowDropdown((prev) => !prev);
 
   useEffect(() => {
-    const load = async () => {
+    console.log("🔍 현재 userInfo 상태:", userInfo); // 🔎 콘솔 로그 추가
+
+    if (!userInfo?.id) return;
+
+    // 1. 초기 알림 로드
+    const loadNotifications = async () => {
       const data = await fetchNotifications(userInfo.id);
       setNotifications(data);
       setUnreadCount(data.filter((n) => !n.read).length);
     };
-    if (userInfo) load();
+    loadNotifications();
+
+    // 2. 실시간 알림 구독
+    const source = subscribeToNotifications(userInfo.id, (newNotification) => {
+      setNotifications((prev) => [newNotification, ...prev]);
+      setUnreadCount((prev) => prev + 1);
+    });
+
+    // 3. 언마운트 시 SSE 연결 해제
+    return () => {
+      if (source) source.close();
+    };
   }, [userInfo]);
 
   const markAsRead = async (id) => {

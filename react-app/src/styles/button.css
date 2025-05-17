@@ -80,3 +80,16 @@ button.btn-danger-light:hover {
   color: #b91c1c;
   border-color: #b91c1c;
 }
+
+@media (max-width: 600px) {
+  .btn, .btn-light, .btn-danger-light {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 1rem;
+  }
+}
+
+.btn, .btn-light, .btn-danger-light {
+  white-space: nowrap; /* 버튼 안 줄바꿈 방지 */
+}
+

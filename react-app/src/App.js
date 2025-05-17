@@ -12,10 +12,14 @@ import GroupManagement from './pages/Group/GroupManagementPage';
 import { AuthProvider, useAuth } from './components/auth/Auth';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ReceiptMyList from './pages/Receipt/ReceiptListMyPage';
-import GroupMemberReceiptList from './pages/Receipt/GroupMemberReceiptList';
-import PasswordVerifyPage from './pages/Auth/PasswordVerifyPage'; 
-import ChangePasswordPage from './pages/Auth/ChangePasswordPage'; 
-import DeleteAccountPage from './pages/Auth/DeleteAccountPage';   
+import GroupReceiptList from './pages/Receipt/GroupReceiptList';
+import PasswordVerifyPage from './pages/Auth/PasswordVerifyPage';
+import ChangePasswordPage from './pages/Auth/ChangePasswordPage';
+import DeleteAccountPage from './pages/Auth/DeleteAccountPage';
+import GroupAnalysisPage from './pages/Group/GroupAnalysisPage';
+import TopStoresPage from './pages/Receipt/TopStoresPage';
+import CategoryStatsPage from './pages/Receipt/CategoryStatsPage';
+import GroupMemberListPage from './pages/Group/GroupMemberListPage'; // ✅ 추가한 페이지 import
 
 function AppRoutes() {
   const { userInfo, loading } = useAuth();
@@ -25,7 +29,6 @@ function AppRoutes() {
   }
 
   if (!userInfo) {
-    // 비로그인 상태
     return (
       <Routes>
         <Route path="/" element={<Home />} />
@@ -36,25 +39,27 @@ function AppRoutes() {
   }
 
   if (userInfo.admin) {
-    // 관리자 회원인 경우
     return (
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/mypage/:userId" element={<ProtectedRoute requiredAdmin={true}><MyPage /></ProtectedRoute>} />
         <Route path="/receipt-upload" element={<ProtectedRoute requiredAdmin={true}><ReceiptUpload /></ProtectedRoute>} />
         <Route path="/group-management" element={<ProtectedRoute requiredAdmin={true}><GroupManagement /></ProtectedRoute>} />
+        <Route path="/group/:groupId/members" element={<ProtectedRoute requiredAdmin={true}><GroupMemberListPage /></ProtectedRoute>} /> {/* ✅ 추가 */}
         <Route path="/my-receipts" element={<ProtectedRoute requiredAdmin={true}><ReceiptMyList /></ProtectedRoute>} />
-        <Route path="/group-member-receipts/:memberId/:year/:month" element={<ProtectedRoute requiredAdmin={true}><GroupMemberReceiptList /></ProtectedRoute>} />
-        {/* 관리자도 비밀번호 변경 / 탈퇴 가능 */}
+        <Route path="/group-member-receipts/:memberId" element={<ProtectedRoute requiredAdmin={true}><GroupReceiptList /></ProtectedRoute>} />
         <Route path="/auth/password-verify" element={<ProtectedRoute><PasswordVerifyPage /></ProtectedRoute>} />
         <Route path="/auth/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
         <Route path="/auth/delete-account" element={<ProtectedRoute><DeleteAccountPage /></ProtectedRoute>} />
+        <Route path="/group/analysis" element={<ProtectedRoute><GroupAnalysisPage /></ProtectedRoute>} />
+        <Route path="/group/group-receipts" element={<ProtectedRoute><GroupReceiptList /></ProtectedRoute>} />
+        <Route path="/group/top-stores" element={<ProtectedRoute><TopStoresPage /></ProtectedRoute>} />
+        <Route path="/group/category-stats" element={<ProtectedRoute><CategoryStatsPage /></ProtectedRoute>} />
       </Routes>
     );
   }
 
   if (userInfo.groupId) {
-    // 그룹에 가입된 일반 회원인 경우
     return (
       <Routes>
         <Route path="/" element={<Home />} />
@@ -62,26 +67,31 @@ function AppRoutes() {
         <Route path="/receipt-upload" element={<ProtectedRoute><ReceiptUpload /></ProtectedRoute>} />
         <Route path="/receipt-history" element={<ProtectedRoute><ReceiptUpload /></ProtectedRoute>} />
         <Route path="/my-receipts" element={<ProtectedRoute><ReceiptMyList /></ProtectedRoute>} />
-        <Route path="/group-member-receipts/:memberId/:year/:month" element={<ProtectedRoute requiredAdmin={true}><GroupMemberReceiptList /></ProtectedRoute>} />
-        {/* 일반 회원도 비밀번호 변경 / 탈퇴 가능 */}
+        <Route path="/group-member-receipts/:memberId" element={<ProtectedRoute requiredAdmin={true}><GroupReceiptList /></ProtectedRoute>} />
         <Route path="/auth/password-verify" element={<ProtectedRoute><PasswordVerifyPage /></ProtectedRoute>} />
         <Route path="/auth/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
         <Route path="/auth/delete-account" element={<ProtectedRoute><DeleteAccountPage /></ProtectedRoute>} />
+        <Route path="/group/analysis" element={<ProtectedRoute><GroupAnalysisPage /></ProtectedRoute>} />
+        <Route path="/group/group-receipts" element={<ProtectedRoute><GroupReceiptList /></ProtectedRoute>} />
+        <Route path="/group/top-stores" element={<ProtectedRoute><TopStoresPage /></ProtectedRoute>} />
+        <Route path="/group/category-stats" element={<ProtectedRoute><CategoryStatsPage /></ProtectedRoute>} />
       </Routes>
     );
   }
 
-  // 그룹에 가입되지 않은 일반 회원인 경우
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/mypage/:userId" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
       <Route path="/create-group" element={<ProtectedRoute><CreateGroup /></ProtectedRoute>} />
       <Route path="/join-group" element={<ProtectedRoute><JoinGroup /></ProtectedRoute>} />
-      {/* 가입 안된 회원도 비밀번호 변경 / 탈퇴 가능 */}
       <Route path="/auth/password-verify" element={<ProtectedRoute><PasswordVerifyPage /></ProtectedRoute>} />
       <Route path="/auth/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
       <Route path="/auth/delete-account" element={<ProtectedRoute><DeleteAccountPage /></ProtectedRoute>} />
+      <Route path="/group/analysis" element={<ProtectedRoute><GroupAnalysisPage /></ProtectedRoute>} />
+      <Route path="/group/group-receipts" element={<ProtectedRoute><GroupReceiptList /></ProtectedRoute>} />
+      <Route path="/group/top-stores" element={<ProtectedRoute><TopStoresPage /></ProtectedRoute>} />
+      <Route path="/group/category-stats" element={<ProtectedRoute><CategoryStatsPage /></ProtectedRoute>} />
     </Routes>
   );
 }

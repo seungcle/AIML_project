@@ -9,31 +9,35 @@
   align-items: center;
   justify-content: center;
   z-index: 999;
+  animation: fadeIn 0.2s ease-in-out;
 }
 
 .modal-content {
   position: relative;
-  background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  max-width: 380px;
+  background: #ffffff;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  max-width: 400px;
   width: 90%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
   text-align: center;
+  font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  animation: scaleIn 0.2s ease-in-out;
 }
 
 .modal-title {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.3rem;
+  font-weight: 600;
   margin-bottom: 1rem;
   color: #111827;
 }
 
 .modal-body {
-  margin-bottom: 1.5rem;
-  font-size: 0.95rem;
+  margin-bottom: 1.8rem;
+  font-size: 1rem;
   color: #374151;
   line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 .modal-buttons {
@@ -43,18 +47,99 @@
   flex-wrap: wrap;
 }
 
+.modal-buttons button {
+  padding: 0.65rem 1.4rem;
+  background-color: #4f46e5; /* indigo-600 */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modal-buttons button:hover {
+  background-color: #4338ca; /* indigo-700 */
+}
+
+/* X 닫기 버튼 */
 .modal-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  font-size: 1.4rem;
-  color: #ef4444;
+  top: 14px;
+  right: 14px;
+  font-size: 1.5rem;
+  color: #9ca3af; /* gray-400 */
   background: none;
   border: none;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, color 0.2s ease;
+
+  /* ✅ 크롬/사파리 포커스 하이라이트 제거 */
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-focus-ring-color: transparent;
 }
 
 .modal-close:hover {
   transform: scale(1.2);
+  color: #ef4444; /* red-500 */
 }
+
+.modal-close:focus,
+.modal-close:focus-visible,
+.modal-close:active {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* 부드러운 모달 애니메이션 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-button-red {
+  background-color: #ef4444; /* red-500 */
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modal-button-red:hover {
+  background-color: #dc2626; /* red-600 */
+}
+
+.modal-button-outline {
+  background-color: white;
+  border: 1.5px solid #d1d5db; /* gray-300 */
+  border-radius: 12px;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151; /* gray-700 */
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.modal-button-outline:hover {
+  background-color: #f3f4f6; /* gray-100 */
+}
+
