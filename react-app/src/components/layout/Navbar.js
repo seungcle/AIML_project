@@ -20,8 +20,6 @@ function Navbar() {
   const toggleDropdown = () => setShowDropdown((prev) => !prev);
 
   useEffect(() => {
-    console.log("🔍 현재 userInfo 상태:", userInfo); // 🔎 콘솔 로그 추가
-
     if (!userInfo?.id) return;
 
     // 1. 초기 알림 로드
@@ -33,14 +31,14 @@ function Navbar() {
     loadNotifications();
 
     // 2. 실시간 알림 구독
-    const source = subscribeToNotifications(userInfo.id, (newNotification) => {
+    const controller = subscribeToNotifications(userInfo.id, (newNotification) => {
       setNotifications((prev) => [newNotification, ...prev]);
       setUnreadCount((prev) => prev + 1);
     });
 
     // 3. 언마운트 시 SSE 연결 해제
     return () => {
-      if (source) source.close();
+      if (controller) controller.abort();
     };
   }, [userInfo]);
 
