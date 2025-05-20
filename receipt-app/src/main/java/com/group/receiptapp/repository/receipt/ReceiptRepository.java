@@ -25,6 +25,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             "WHERE m.group.id = :groupId " +
             "AND YEAR(r.date) = :year " +
             "AND MONTH(r.date) = :month " +
+            "AND r.isDeleted = false " +
             "GROUP BY c.name")
     List<Object[]> getCategoryStats(@Param("groupId") Long groupId,
                                     @Param("year") int year,
@@ -37,6 +38,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             "WHERE m.group.id = :groupId " +
             "AND YEAR(r.date) = :year " +
             "AND MONTH(r.date) = :month " +
+            "AND r.isDeleted = false " +
             "GROUP BY m.id, m.name")
     List<Object[]> getMemberSpending(@Param("groupId") Long groupId,
                                      @Param("year") int year,
@@ -45,6 +47,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
     // 그룹별 가장 많이 사용한 점포 조회 (Top 3)
     @Query("SELECT r.storeName, COUNT(r.id), SUM(r.amount) FROM Receipt r " +
             "WHERE r.member.group.id = :groupId AND YEAR(r.date) = :year AND MONTH(r.date) = :month " +
+            "AND r.isDeleted = false " +
             "GROUP BY r.storeName " +
             "ORDER BY COUNT(r.id) DESC, SUM(r.amount) DESC")
     List<Object[]> getTopStoresByGroup(@Param("groupId") Long groupId,
@@ -56,6 +59,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             "WHERE r.member.id = :memberId " +
             "AND YEAR(r.date) = :year " +
             "AND MONTH(r.date) = :month " +
+            "AND r.isDeleted = false " +
             "GROUP BY r.category.name")
     List<Object[]> getMemberCategorySpending(
             @Param("memberId") Long memberId,
@@ -67,6 +71,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             "FROM Receipt r WHERE r.member.id = :memberId " +
             "AND YEAR(r.date) = :year " +
             "AND MONTH(r.date) = :month " +
+            "AND r.isDeleted = false " +
             "ORDER BY r.date DESC")
     List<Object[]> getReceiptsByMemberAndDate(
             @Param("memberId") Long memberId,
@@ -79,6 +84,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             "WHERE r.member.group.id = :groupId " +
             "AND YEAR(r.date) = :year " +
             "AND MONTH(r.date) = :month " +
+            "AND r.isDeleted = false " +
             "ORDER BY r.date DESC")
     List<Object[]> getReceiptsByGroupAndDate(
             @Param("groupId") Long groupId,
