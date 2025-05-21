@@ -13,26 +13,27 @@ function GroupManagement() {
   const navigate = useNavigate();
   const { userInfo } = useAuth();
 
+  // ✅ 상태 불러오기 - /group/{groupId}
   useEffect(() => {
-    const fetchDuplicateSetting = async () => {
+    const fetchGroupInfo = async () => {
       if (!userInfo?.groupId) return;
       try {
         const token = getAccessToken();
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/group/${userInfo.groupId}`, {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/group/my-group`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
           const data = await res.json();
-          setIsDuplicateCheckEnabled(data.duplicateCheckEnabled);
+          setIsDuplicateCheckEnabled(data.preventDuplicateReceipt);
         } else {
-          console.warn('중복 확인 상태 불러오기 실패');
+          console.warn('그룹 정보 불러오기 실패');
         }
       } catch (err) {
-        console.error('중복 확인 상태 요청 중 에러:', err);
+        console.error('그룹 정보 요청 중 에러:', err);
       }
     };
 
-    fetchDuplicateSetting();
+    fetchGroupInfo();
   }, [userInfo]);
 
   const toggleDuplicateCheck = async () => {
@@ -90,13 +91,26 @@ function GroupManagement() {
           <button className="btn" style={{ width: 'fit-content' }} onClick={handleViewJoinRequests}>
             {showJoinRequests ? '⛔ 신청 목록 닫기' : '👥 그룹 신청 목록 보기'}
           </button>
+
           <button className="btn" style={{ width: 'fit-content' }} onClick={handleGoToLimitPage}>
             🧾 멤버별 지출 한도 설정
           </button>
+
+          {/* ✅ 토글 스위치로 중복 여부 표시 */}
           {userInfo?.groupId && isDuplicateCheckEnabled !== null && (
-            <button className="btn" style={{ width: 'fit-content' }} onClick={toggleDuplicateCheck}>
-              {isDuplicateCheckEnabled ? '🔁 중복 확인 끄기' : '✅ 중복 확인 켜기'}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={isDuplicateCheckEnabled}
+                  onChange={toggleDuplicateCheck}
+                />
+                <span className="slider round"></span>
+              </label>
+              <span style={{ fontSize: '0.95rem', color: '#374151' }}>
+                중복 여부: {isDuplicateCheckEnabled ? 'ON' : 'OFF'}
+              </span>
+            </div>
           )}
         </div>
 

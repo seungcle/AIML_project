@@ -15,6 +15,7 @@ button.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap; /* 버튼 안 줄바꿈 방지 */
 }
 
 /* hover 효과 */
@@ -43,7 +44,7 @@ button.btn-sm {
   font-size: 0.875rem;
 }
 
-/* button.css 하단이나 global.css에 추가해도 됨 */
+/* 홈 CTA 버튼 */
 .home-cta-button {
   display: inline-flex;
   align-items: center;
@@ -81,15 +82,13 @@ button.btn-danger-light:hover {
   border-color: #b91c1c;
 }
 
+/* ✅ 작은 화면에서도 버튼 width를 자동으로 유지 */
 @media (max-width: 600px) {
-  .btn, .btn-light, .btn-danger-light {
-    width: 100%;
-    font-size: 1.1rem;
-    padding: 1rem;
+  .btn,
+  .btn-light,
+  .btn-danger-light {
+    width: auto; /* ⬅️ 기존의 width: 100% 제거 */
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
   }
 }
-
-.btn, .btn-light, .btn-danger-light {
-  white-space: nowrap; /* 버튼 안 줄바꿈 방지 */
-}
-

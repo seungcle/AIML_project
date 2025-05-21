@@ -29,17 +29,14 @@ export const verifyPassword = async (password) => {
   );
 };
 
-// ❌ 회원 탈퇴 요청 (비밀번호는 이미 검증된 상태에서 호출)
+// ✅ 회원 탈퇴 요청 (비밀번호는 이미 검증된 상태에서 호출됨)
 export const deleteAccount = async () => {
-    const token = getAccessToken();
-    return axios.post(
-      `${process.env.REACT_APP_API_URL}/member/delete-account`,
-      {}, // ← 빈 body (필요 없다면)
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-  };
+  const token = getAccessToken();
+  return axios.delete(`${process.env.REACT_APP_API_URL}/member/delete-account`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
   
