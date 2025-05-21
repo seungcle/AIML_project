@@ -6,6 +6,7 @@ import com.group.receiptapp.domain.join.JoinRequest;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.dto.GroupResponse;
 import com.group.receiptapp.dto.join.JoinRequestResponse;
+import com.group.receiptapp.dto.member.MemberBudgetResponse;
 import com.group.receiptapp.dto.member.MemberResponse;
 import com.group.receiptapp.repository.member.MemberRepository;
 import com.group.receiptapp.security.JwtUtil;
@@ -192,28 +193,34 @@ public class GroupController {
         return ResponseEntity.ok(response);
     }
 
-    // 그룹 관리자가 지출 한도 변경하기
-    @PutMapping("/{groupId}/spending-limit")
-    public ResponseEntity<GroupResponse> updateSpendingLimit(
+    // 그룹 관리자가 멤버들의 지출 한도 정보 조회하기
+    @GetMapping("/{groupId}/members/budgets")
+    public ResponseEntity<List<MemberBudgetResponse>> getGroupMemberBudgets(
             @PathVariable Long groupId,
-            @RequestParam Double newSpendingLimit,
             @RequestHeader("Authorization") String authHeader
     ) {
-        // 인증된 사용자 확인
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String token = authHeader.substring(7);
+        String token = jwtUtil.resolveToken(authHeader);
         String email = jwtUtil.extractUsername(token);
-        Long memberId = loginService.getMemberIdByEmail(email);
+        Long requesterId = loginService.getMemberIdByEmail(email);
 
-        // 관리자 권한 확인 및 한도 변경
-        groupReceiptSettingService.updateSpendingLimit(groupId, newSpendingLimit, memberId);
+        List<MemberBudgetResponse> members = groupReceiptSettingService.getMembersWithBudget(groupId, requesterId);
+        return ResponseEntity.ok(members);
+    }
 
-        // 업데이트된 그룹 정보 반환
-        Group updatedGroup = groupService.getGroupById(groupId);
-        return ResponseEntity.ok(new GroupResponse(updatedGroup));
+    // 지출 한도 설정하기
+    @PutMapping("/{groupId}/members/{memberId}/budget")
+    public ResponseEntity<Void> updateBudget(
+            @PathVariable Long groupId,
+            @PathVariable Long memberId,
+            @RequestParam BigDecimal budget,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = jwtUtil.resolveToken(authHeader);
+        String email = jwtUtil.extractUsername(token);
+        Long requesterId = loginService.getMemberIdByEmail(email);
+
+        groupReceiptSettingService.updateMemberBudget(groupId, memberId, budget, requesterId);
+        return ResponseEntity.ok().build();
     }
 
 }

@@ -171,10 +171,10 @@ public class ReceiptService {
             }
             Long groupId = member.getGroup().getId();
 
-            // 지출 한도 체크
-            if (request.getAmount().compareTo(member.getGroup().getSpendingLimit()) > 0) {
+            // 멤버 개인별 지출 한도 검사
+            if (request.getAmount().compareTo(member.getBudget()) > 0) {
                 String message = "지출 한도를 초과했습니다. Total: " + request.getAmount();
-                notificationService.sendLimitExceededNotification(groupId, member.getId(), request.getAmount(), member.getGroup().getSpendingLimit());
+                notificationService.sendLimitExceededNotification(groupId, member.getId(), request.getAmount(), member.getBudget());
                 throw new IllegalStateException("지출 한도 초과");
             }
 
@@ -238,6 +238,12 @@ public class ReceiptService {
             // 데이터베이스에 저장
             receiptRepository.save(receipt);
             log.info("Receipt saved successfully with ID: {}", receipt.getId());
+
+            // 예산 차감
+            BigDecimal remainingBudget = member.getBudget().subtract(request.getAmount());
+            member.setBudget(remainingBudget);
+            memberRepository.save(member);  // 예산 변경 저장
+            log.info("예산 차감 완료. 남은 예산: {}", remainingBudget);
 
             // 같은 그룹 멤버에게 알림 생성 및 SSE 전송
             String message = String.format("'%s'님이 '%s' 영수증을 등록했습니다.", member.getName(), receipt.getStoreName());
