@@ -157,6 +157,7 @@ public class NotificationService {
         }
     }
 
+    /*
     // 지출 한도 초과 알림 전송
     public void sendLimitExceededNotification(Long groupId, Long memberId, BigDecimal spendingAmount, BigDecimal spendingLimit) {
         // 그룹 멤버 목록 조회
@@ -185,6 +186,38 @@ public class NotificationService {
                     log.error("SSE 전송 실패: {}", e.getMessage());
                     sseEmitterRepository.removeEmitter(member.getId(), emitter);
                 }
+            }
+        }
+    }
+*/
+
+    public void sendLimitExceededNotificationToAdmin(Long groupId, Member targetMember, BigDecimal memberSpending, BigDecimal budget) {
+        // 그룹 관리자 조회
+        Member admin = memberRepository.findByGroupIdAndIsAdminTrue(groupId)
+                .orElseThrow(() -> new IllegalStateException("해당 그룹의 관리자를 찾을 수 없습니다."));
+
+        String message =
+                targetMember.getName() + " 님이 한도를 초과했습니다.\n" +
+                "설정 한도: " + budget + "\n" +
+                "현재 지출: " + memberSpending;
+
+        // 알림 저장
+        Notification notification = new Notification();
+        notification.setGroupId(groupId);
+        notification.setMemberId(admin.getId()); // 알림을 받을 사람: 관리자
+        notification.setMessage(message);
+        notificationRepository.save(notification);
+
+        // SSE 전송
+        List<SseEmitter> emitters = sseEmitterRepository.getEmitters(admin.getId());
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event()
+                        .name("NEW_NOTIFICATION")
+                        .data(NotificationResponse.fromEntity(notification)));
+            } catch (IOException e) {
+                log.error("SSE 전송 실패: {}", e.getMessage());
+                sseEmitterRepository.removeEmitter(admin.getId(), emitter);
             }
         }
     }

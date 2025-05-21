@@ -173,8 +173,7 @@ public class ReceiptService {
 
             // 멤버 개인별 지출 한도 검사
             if (request.getAmount().compareTo(member.getBudget()) > 0) {
-                String message = "지출 한도를 초과했습니다. Total: " + request.getAmount();
-                notificationService.sendLimitExceededNotification(groupId, member.getId(), request.getAmount(), member.getBudget());
+                notificationService.sendLimitExceededNotificationToAdmin(groupId, member, request.getAmount(), member.getBudget());
                 throw new IllegalStateException("지출 한도 초과");
             }
 

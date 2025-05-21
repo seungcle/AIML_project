@@ -49,11 +49,6 @@ public class GroupService {
         // 중복이 없으면 그룹 생성
         Group group = new Group();
         group.setName(request.getName());
-        group.setSpendingLimit(
-                request.getSpendingLimit() != null
-                        ? BigDecimal.valueOf(request.getSpendingLimit())
-                        : BigDecimal.ZERO
-        );  // 지출 한도 설정
         group.setPreventDuplicateReceipt(request.isPreventDuplicateReceipt());  // 중복 영수증 방지 설정
         groupRepository.save(group);
 

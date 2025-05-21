@@ -56,7 +56,7 @@ public class GroupReceiptSettingService {
             throw new IllegalArgumentException("대상 멤버는 해당 그룹에 속하지 않습니다.");
         }
 
-        // 예산 수정
+        // 한도 수정
         target.setBudget(newBudget);
         memberRepository.save(target);
     }

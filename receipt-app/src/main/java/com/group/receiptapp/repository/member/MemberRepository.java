@@ -28,6 +28,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT m FROM Member m WHERE m.group.id = :groupId AND m.isAdmin = true")
     Optional<Member> findAdminByGroupId(@Param("groupId") Long groupId);
 
-
+    Optional<Member> findByGroupIdAndIsAdminTrue(Long groupId);
 
 }
