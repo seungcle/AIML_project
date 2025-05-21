@@ -2,7 +2,6 @@
 package com.group.receiptapp.dto.member;
 
 import com.group.receiptapp.domain.member.Member;
-import com.group.receiptapp.dto.GroupResponse;
 
 public class MemberResponse {
     private Long id;
