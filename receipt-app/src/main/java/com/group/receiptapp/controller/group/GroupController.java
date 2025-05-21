@@ -5,6 +5,7 @@ import com.group.receiptapp.domain.group.Group;
 import com.group.receiptapp.domain.join.JoinRequest;
 import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.dto.GroupResponse;
+import com.group.receiptapp.dto.group.AdminGroupResponse;
 import com.group.receiptapp.dto.join.JoinRequestResponse;
 import com.group.receiptapp.dto.member.MemberBudgetResponse;
 import com.group.receiptapp.dto.member.MemberResponse;
@@ -223,4 +224,26 @@ public class GroupController {
         return ResponseEntity.ok().build();
     }
 
+    // 그룹 관리자가 속한 그룹의 정보
+    @GetMapping("/my-group")
+    public ResponseEntity<AdminGroupResponse> getMyGroupInfo(@RequestHeader("Authorization") String authHeader) {
+        String token = jwtUtil.resolveToken(authHeader);
+        String email = jwtUtil.extractUsername(token);
+        Long memberId = loginService.getMemberIdByEmail(email);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (!member.isAdmin()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 관리자가 아닐 경우
+        }
+
+        Group group = member.getGroup();
+        if (group == null) {
+            return ResponseEntity.notFound().build(); // 그룹이 없을 경우
+        }
+
+        AdminGroupResponse response = new AdminGroupResponse(group);
+        return ResponseEntity.ok(response);
+    }
 }
