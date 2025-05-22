@@ -1,6 +1,7 @@
 # AIML_project
 
 Receipt Management Web for Company
+https://aiml-project-git-main-seungcles-projects.vercel.app/
 
 Tool
 - Web: React, HTML, CSS, JavaScript, Python (OpenAI), Vercel (웹), Render (AI 서버)
