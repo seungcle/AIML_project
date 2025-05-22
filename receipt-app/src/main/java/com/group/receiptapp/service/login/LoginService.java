@@ -29,8 +29,6 @@ public class LoginService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil; // JwtUtil 주입
 
-    /** @return null 로그인 실패 **/
-
     public Member login(String email, String rawPassword) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -70,5 +68,10 @@ public class LoginService {
     @Transactional
     public void invalidateRefreshTokenByMemberId(Long memberId) {
         refreshTokenRepository.deleteByMemberId(memberId);
+    }
+
+    public Member loadUserByUsernameAsMember(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일을 가진 회원이 존재하지 않습니다."));
     }
 }
