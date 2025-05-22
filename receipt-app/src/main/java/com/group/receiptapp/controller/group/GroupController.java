@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.group.receiptapp.dto.group.CreateGroupRequest;
+import com.group.receiptapp.repository.group.GroupRepository;
 
 @RestController
 @RequestMapping("/group")
@@ -43,10 +44,12 @@ public class GroupController {
     private final GroupReceiptSettingService groupReceiptSettingService;
     private final JwtUtil jwtUtil;
     private final LoginService loginService;
+    private final GroupRepository groupRepository;
 
     public GroupController(MemberService memberService, GroupService groupService, EmailService emailService,
                            NotificationService notificationService, MemberRepository memberRepository,
-                           GroupReceiptSettingService groupReceiptSettingService, JwtUtil jwtUtil, LoginService loginService) {
+                           GroupReceiptSettingService groupReceiptSettingService, JwtUtil jwtUtil, LoginService loginService,
+                           GroupRepository groupRepository) {
         this.memberService = memberService; // memberService 주입
         this.groupService = groupService; // groupService 주입
         this.emailService = emailService;
@@ -55,6 +58,7 @@ public class GroupController {
         this.groupReceiptSettingService = groupReceiptSettingService;
         this.jwtUtil = jwtUtil;
         this.loginService = loginService;
+        this.groupRepository = groupRepository;
     }
 
     @PostMapping(value = "/create", produces = "application/json")
@@ -246,4 +250,33 @@ public class GroupController {
         AdminGroupResponse response = new AdminGroupResponse(group);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/delete/{groupId}")
+    public ResponseEntity<?> deleteGroup(@PathVariable Long groupId, @RequestHeader("Authorization") String authHeader) {
+        String token = jwtUtil.resolveToken(authHeader);
+        String email = jwtUtil.extractUsername(token);
+        Member requester = loginService.loadUserByUsernameAsMember(email);
+
+        // 관리자 권한 확인
+        if (!requester.isAdmin()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("그룹 삭제 권한이 없습니다.");
+        }
+
+        Group group = requester.getGroup();
+        if (group == null || !group.getId().equals(groupId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 그룹 정보입니다.");
+        }
+
+        List<Member> membersInGroup = memberRepository.findByGroupId(groupId);
+        if (membersInGroup.size() > 1) {
+            return ResponseEntity.badRequest().body("그룹에 일반 멤버가 있어 삭제할 수 없습니다.");
+        }
+
+        // 삭제 조건 만족: 관리자 혼자만 있는 그룹
+        requester.setGroup(null); // 그룹 참조 끊기
+        groupRepository.delete(group);
+
+        return ResponseEntity.ok("그룹이 삭제되었습니다.");
+    }
+
 }
