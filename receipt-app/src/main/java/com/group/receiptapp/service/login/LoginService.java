@@ -4,8 +4,14 @@ import com.group.receiptapp.domain.member.Member;
 import com.group.receiptapp.domain.token.RefreshToken;
 import com.group.receiptapp.repository.member.MemberRepository;
 import com.group.receiptapp.repository.member.RefreshTokenRepository;
+import com.group.receiptapp.security.CustomUserDetails;
 import com.group.receiptapp.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +23,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class LoginService {
 
+    private final AuthenticationManager authenticationManager;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;  // PasswordEncoder 의존성 추가
     private final RefreshTokenRepository refreshTokenRepository;
@@ -25,9 +32,18 @@ public class LoginService {
     /** @return null 로그인 실패 **/
 
     public Member login(String email, String rawPassword) {
-        return memberRepository.findByEmail(email)
-                .filter(member -> passwordEncoder.matches(rawPassword, member.getPassword()))  // 비밀번호 검증
-                .orElse(null);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, rawPassword)
+            );
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            return userDetails.getMember(); // 로그인 성공 시 Member 반환
+
+        } catch (DisabledException e) {
+            throw new IllegalStateException("비활성화된 계정입니다.");
+        } catch (BadCredentialsException e) {
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.");
+        }
     }
 
     @Transactional(readOnly = true)
