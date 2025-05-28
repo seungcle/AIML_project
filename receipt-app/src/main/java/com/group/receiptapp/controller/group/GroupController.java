@@ -279,4 +279,74 @@ public class GroupController {
         return ResponseEntity.ok("그룹이 삭제되었습니다.");
     }
 
+    @PutMapping("/transfer-admin/{newAdminId}")
+    public ResponseEntity<?> transferAdmin(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable Long newAdminId) {
+
+        String token = jwtUtil.resolveToken(authHeader);
+        String email = jwtUtil.extractUsername(token);
+        Member currentAdmin = loginService.loadUserByUsernameAsMember(email);
+
+        if (!currentAdmin.isAdmin()) {
+            return ResponseEntity.status(403).body("관리자만 권한을 위임할 수 있습니다.");
+        }
+
+        Member newAdmin = memberRepository.findById(newAdminId)
+                .orElseThrow(() -> new IllegalArgumentException("위임할 수 있는 멤버가 존재하지 않습니다."));
+
+        if (!newAdmin.isActive()) {
+            return ResponseEntity.badRequest().body("비활성화된 멤버에게는 권한을 위임할 수 없습니다.");
+        }
+
+        // 같은 그룹인지 확인
+        if (currentAdmin.getGroup() == null ||
+                newAdmin.getGroup() == null ||
+                !currentAdmin.getGroup().getId().equals(newAdmin.getGroup().getId())) {
+            return ResponseEntity.badRequest().body("같은 그룹의 멤버에게만 권한을 위임할 수 있습니다.");
+        }
+
+        // 본인에게 위임 불가
+        if (currentAdmin.getId().equals(newAdmin.getId())) {
+            return ResponseEntity.badRequest().body("자기 자신에게는 권한을 위임할 수 없습니다.");
+        }
+
+        // 권한 전환
+        currentAdmin.setAdmin(false);
+        newAdmin.setAdmin(true);
+        memberRepository.save(currentAdmin);
+        memberRepository.save(newAdmin);
+
+        return ResponseEntity.ok("관리자 권한이 성공적으로 위임되었습니다.");
+    }
+
+    @PostMapping("/leave")
+    public ResponseEntity<String> leaveGroup(@RequestHeader("Authorization") String authHeader) {
+        String token = jwtUtil.resolveToken(authHeader);
+        String email = jwtUtil.extractUsername(token);
+        Long memberId = loginService.getMemberIdByEmail(email);
+
+        Member member = memberService.findOne(memberId);
+
+        if (member.isAdmin()) {
+            Group group = member.getGroup();
+
+            // 그룹이 null이면 예외
+            if (group == null) {
+                throw new IllegalStateException("소속된 그룹이 없습니다.");
+            }
+
+            // 관리자 외에 다른 멤버 있는지 확인
+            boolean hasOtherActiveMember = group.getMembers().stream()
+                    .anyMatch(m -> !m.getId().equals(member.getId()) && m.isActive());
+
+            if (hasOtherActiveMember) {
+                return ResponseEntity.badRequest()
+                        .body("탈퇴하려면 먼저 다른 멤버에게 관리자 권한을 위임해야 합니다.");
+            }
+        }
+
+        String message = memberService.leaveGroup(member);
+        return ResponseEntity.ok(message);
+    }
 }

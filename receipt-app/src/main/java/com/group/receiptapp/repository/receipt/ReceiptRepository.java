@@ -23,6 +23,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             "JOIN r.category c " +
             "JOIN r.member m " +
             "WHERE m.group.id = :groupId " +
+            "AND m.isActive = true " +
             "AND YEAR(r.date) = :year " +
             "AND MONTH(r.date) = :month " +
             "AND r.isDeleted = false " +
@@ -36,6 +37,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
             "FROM Receipt r " +
             "JOIN r.member m " +
             "WHERE m.group.id = :groupId " +
+            "AND m.isActive = true " +
             "AND YEAR(r.date) = :year " +
             "AND MONTH(r.date) = :month " +
             "AND r.isDeleted = false " +
@@ -46,7 +48,9 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
 
     // 그룹별 가장 많이 사용한 점포 조회 (Top 3)
     @Query("SELECT r.storeName, COUNT(r.id), SUM(r.amount) FROM Receipt r " +
-            "WHERE r.member.group.id = :groupId AND YEAR(r.date) = :year AND MONTH(r.date) = :month " +
+            "JOIN r.member m " +
+            "WHERE m.group.id = :groupId AND m.isActive = true " +
+            "AND YEAR(r.date) = :year AND MONTH(r.date) = :month " +
             "AND r.isDeleted = false " +
             "GROUP BY r.storeName " +
             "ORDER BY COUNT(r.id) DESC, SUM(r.amount) DESC")
@@ -57,6 +61,7 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
     // 멤버별 총 지출과 카테고리별 지출 조회
     @Query("SELECT r.category.name, SUM(r.amount) FROM Receipt r " +
             "WHERE r.member.id = :memberId " +
+            "AND r.member.isActive = true " + // 추가 필요
             "AND YEAR(r.date) = :year " +
             "AND MONTH(r.date) = :month " +
             "AND r.isDeleted = false " +
@@ -81,18 +86,20 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
     // 특정 그룹의 연도/월별 영수증 조회
     @Query("SELECT r.id, r.storeName, r.storeAddress, r.memo, r.date, r.amount, " +
             "r.member.name, r.category.name FROM Receipt r " +
-            "WHERE r.member.group.id = :groupId " +
+            "JOIN r.member m " +
+            "WHERE m.group.id = :groupId " +
+            "AND m.isActive = true " +
             "AND YEAR(r.date) = :year " +
             "AND MONTH(r.date) = :month " +
             "AND r.isDeleted = false " +
             "ORDER BY r.date DESC")
-    List<Object[]> getReceiptsByGroupAndDate(
-            @Param("groupId") Long groupId,
-            @Param("year") int year,
-            @Param("month") int month);
+    List<Object[]> getReceiptsByGroupAndDate(@Param("groupId") Long groupId,
+                                             @Param("year") int year,
+                                             @Param("month") int month);
 
     @Query("SELECT r FROM Receipt r " +
             "WHERE r.member.id = :memberId " +
+            "AND r.member.isActive = true " + // 추가 권장
             "AND FUNCTION('YEAR', r.date) = :year " +
             "AND FUNCTION('MONTH', r.date) = :month " +
             "AND r.isDeleted = false")
