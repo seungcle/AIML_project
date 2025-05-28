@@ -17,6 +17,7 @@ public class CorsConfig {
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
                 "https://hongikreceipt.kr",
+                "https://api.hongikreceipt.kr",
                 "https://aiml-project-git-main-seungcles-projects.vercel.app"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
