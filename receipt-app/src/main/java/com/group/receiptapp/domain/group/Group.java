@@ -22,7 +22,7 @@ public class Group {
     @Column(name = "group_name", nullable = false, unique = true)
     private String name; // 그룹 이름
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "group")
     private List<Member> members = new ArrayList<>(); // 그룹에 속한 사용자들
 
     @Column(name = "prevent_duplicate_receipt", nullable = false)
