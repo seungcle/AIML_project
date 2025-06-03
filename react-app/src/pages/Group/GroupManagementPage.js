@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, getAccessToken } from '../../components/auth/Auth';
 import GroupJoinRequests from '../../components/group/GroupJoinRequests';
+import DeleteGroupButton from '../../components/group/DeleteGroupButton';
 import '../../styles/card.css';
 import '../../styles/form.css';
 import '../../styles/layout.css';
@@ -13,7 +14,6 @@ function GroupManagement() {
   const navigate = useNavigate();
   const { userInfo } = useAuth();
 
-  // ✅ 상태 불러오기 - /group/{groupId}
   useEffect(() => {
     const fetchGroupInfo = async () => {
       if (!userInfo?.groupId) return;
@@ -73,6 +73,14 @@ function GroupManagement() {
     }
   };
 
+  const handleGoToDelegatePage = () => {
+    if (userInfo?.groupId) {
+      navigate(`/group/${userInfo.groupId}/delegate`);
+    } else {
+      alert('그룹 ID를 불러올 수 없습니다.');
+    }
+  };
+
   return (
     <div className="page-container">
       <div className="card">
@@ -96,7 +104,12 @@ function GroupManagement() {
             🧾 멤버별 지출 한도 설정
           </button>
 
-          {/* ✅ 토글 스위치로 중복 여부 표시 */}
+          <DeleteGroupButton groupId={userInfo?.groupId} />
+
+          <button className="btn" style={{ width: 'fit-content' }} onClick={handleGoToDelegatePage}>
+            🛡️ 관리자 권한 위임하기
+          </button>
+
           {userInfo?.groupId && isDuplicateCheckEnabled !== null && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <label className="switch">

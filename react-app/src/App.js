@@ -19,7 +19,8 @@ import DeleteAccountPage from './pages/Auth/DeleteAccountPage';
 import GroupAnalysisPage from './pages/Group/GroupAnalysisPage';
 import TopStoresPage from './pages/Receipt/TopStoresPage';
 import CategoryStatsPage from './pages/Receipt/CategoryStatsPage';
-import GroupMemberListPage from './pages/Group/GroupMemberListPage'; // ✅ 추가한 페이지 import
+import GroupMemberListPage from './pages/Group/GroupMemberListPage';
+import GroupDelegatePage from './pages/Group/GroupDelegatePage'; // ✅ 추가
 
 function AppRoutes() {
   const { userInfo, loading } = useAuth();
@@ -45,7 +46,8 @@ function AppRoutes() {
         <Route path="/mypage/:userId" element={<ProtectedRoute requiredAdmin={true}><MyPage /></ProtectedRoute>} />
         <Route path="/receipt-upload" element={<ProtectedRoute requiredAdmin={true}><ReceiptUpload /></ProtectedRoute>} />
         <Route path="/group-management" element={<ProtectedRoute requiredAdmin={true}><GroupManagement /></ProtectedRoute>} />
-        <Route path="/group/:groupId/members" element={<ProtectedRoute requiredAdmin={true}><GroupMemberListPage /></ProtectedRoute>} /> {/* ✅ 추가 */}
+        <Route path="/group/:groupId/members" element={<ProtectedRoute requiredAdmin={true}><GroupMemberListPage /></ProtectedRoute>} />
+        <Route path="/group/:groupId/delegate" element={<ProtectedRoute requiredAdmin={true}><GroupDelegatePage /></ProtectedRoute>} /> {/* ✅ 추가 */}
         <Route path="/my-receipts" element={<ProtectedRoute requiredAdmin={true}><ReceiptMyList /></ProtectedRoute>} />
         <Route path="/group-member-receipts/:memberId" element={<ProtectedRoute requiredAdmin={true}><GroupReceiptList /></ProtectedRoute>} />
         <Route path="/auth/password-verify" element={<ProtectedRoute><PasswordVerifyPage /></ProtectedRoute>} />

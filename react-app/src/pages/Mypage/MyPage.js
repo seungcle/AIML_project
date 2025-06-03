@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../components/auth/Auth';
 import { useNavigate } from 'react-router-dom';
+import LeaveGroupButton from '../../components/group/LeaveGroupButton'; // ✅ 추가
 import '../../styles/card.css';
 import '../../styles/layout.css';
 import '../../styles/button.css';
@@ -105,6 +106,31 @@ const MyPage = () => {
           </button>
         </div>
       </div>
+
+      {/* 그룹 탈퇴 카드 */}
+      {userInfo.groupId && (
+        <div
+          className="card"
+          style={{
+            maxWidth: '500px',
+            margin: '0 auto',
+            marginTop: '2rem',
+            padding: '2rem',
+            borderRadius: '1rem',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            textAlign: 'center',
+          }}
+        >
+          <h3 style={{ marginBottom: '1rem', fontSize: '1.3rem', color: '#222' }}>
+            그룹 탈퇴하기
+          </h3>
+          <p style={{ marginBottom: '1.5rem', fontSize: '1rem', color: '#666' }}>
+            현재 속한 그룹에서 탈퇴할 수 있어요. <br />
+            탈퇴 시 그룹의 기능을 더 이상 사용할 수 없습니다.
+          </p>
+          <LeaveGroupButton />
+        </div>
+      )}
     </div>
   );
 };
