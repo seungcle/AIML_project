@@ -1,18 +1,20 @@
 # AIML_project
 
 Receipt Management Web for Company
-https://aiml-project-git-main-seungcles-projects.vercel.app/
+https://hongikreceipt.kr/
+
+<img width="419" alt="Image" src="https://github.com/user-attachments/assets/426927b6-175c-435f-b56e-828a9d9ce131" />
 
 Tool
 - Web: React, HTML, CSS, JavaScript, Python (OpenAI), Vercel (웹), Render (AI 서버)
 - Server: IntelliJ IDEA,  Spring Boot, MySQL, Docker + AWS EC2 + GitHub Actions, Postman
 - Collaboration: Git, GitHub
 
-Development
-- 유저는 그룹 관리자와 그룹 멤버로 구성되며, 그룹을 개설하거나 가입 신청을 통해 멤버가 되어 영수증 사진을 등록하여 사용 내역을 웹상에서 쉽게 관리할 수 있다. OCR 처리된 영수증의 내역을 분석하여 카테고리 분류를 자동으로 처리하며, 영수증 내역을 직접 수정할 수도 있다. 유저가 등록한 사용 내역을 통계화하여 제공한다.
-
 Motivation
 - 본 프로젝트는 회사 내 구성원이 사용하는 법인카드 사용 내역을 엑셀이나 수기로 정리하는 기존의 불편함을 줄이는 것에서 시작된 프로젝트다. 기존의 방식에서 일어날 수 있는 불필요한 시간 소모 소요, 오기재 가능성을 획기적으로 줄이고 통계 기능 등을 더해 효율적인 서비스를 만들고자 했다.
+
+Development
+- 유저는 그룹 관리자와 그룹 멤버로 구성되며, 그룹을 개설하거나 가입 신청을 통해 멤버가 되어 영수증 사진을 등록하여 사용 내역을 웹상에서 쉽게 관리할 수 있다. OCR 처리된 영수증의 내역을 분석하여 카테고리 분류를 자동으로 처리하며, 영수증 내역을 직접 수정할 수도 있다. 유저가 등록한 사용 내역을 통계화하여 제공한다.
 
 Algorithm
 - <영수증 사진 등록 처리>
