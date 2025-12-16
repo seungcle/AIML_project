@@ -1,7 +1,6 @@
 # AIML_project
 
 Receipt Management Web for Company
-https://hongikreceipt.kr/
 
 <img width="419" alt="Image" src="https://github.com/user-attachments/assets/aada196f-5e5d-4ade-a9c2-6970589d8032" />
 <img width="419" alt="Image" src="https://github.com/user-attachments/assets/ea6b9fb7-8f03-4db6-9c06-c64ae08c0ecb" />
